@@ -143,6 +143,78 @@
       "n_levels": 11
     }
   },
+  "qwen_qwen-2.5-72b-instruct": {
+    "n_total": 11385,
+    "n_valid": 11381,
+    "n_ambiguous": 4,
+    "spearman": {
+      "rho": 0.035,
+      "p_value": 0.00018991396916210405,
+      "n": 11381,
+      "significant": true,
+      "interpretation": "positive correlation (sycophancy increases with context)"
+    },
+    "mann_whitney": {
+      "U": 3291178.5,
+      "p_value": 0.0002965330954760069,
+      "n_low": 2069,
+      "n_high": 3105,
+      "mean_low": 0.0536,
+      "mean_high": 0.0783,
+      "significant": true,
+      "interpretation": "sycophancy significantly higher at \u226580% context vs \u226410% (p=0.0003)"
+    },
+    "chi_squared_filler": {
+      "chi2": 115.9179,
+      "p_value": 6.741219908728157e-26,
+      "dof": 2,
+      "significant": true,
+      "rates_by_filler": {
+        "neutral": 0.058,
+        "agreement": 0.102,
+        "correction": 0.0422
+      },
+      "interpretation": "filler type significantly affects sycophancy rate"
+    },
+    "mixed_effects": {
+      "method": "binomial_bayesian_mixed_glm",
+      "context_coef": 1.0124,
+      "agreement_coef": 1.4024,
+      "correction_coef": -0.7702,
+      "intercept": -8.1846,
+      "n_observations": 11381,
+      "n_groups": 115,
+      "note": "Coefficients are log-odds. Positive context_coef = sycophancy increases with context."
+    },
+    "effect_size": {
+      "cohens_h": 0.1399,
+      "p_low": 0.0464,
+      "p_high": 0.0802,
+      "context_low": 0.0,
+      "context_high": 1.0,
+      "magnitude": "negligible",
+      "interpretation": "Negligible effect (h=0.140): sycophancy increases from 4.6% at 0% context to 8.0% at 100% context"
+    },
+    "trend": {
+      "trend": "flat",
+      "description": "No meaningful change (+3.4pp across range)",
+      "total_change_pp": 3.38,
+      "rates_by_level": {
+        "0%": 0.0464,
+        "10%": 0.0609,
+        "20%": 0.0619,
+        "30%": 0.0686,
+        "40%": 0.0638,
+        "50%": 0.0609,
+        "60%": 0.0668,
+        "70%": 0.0773,
+        "80%": 0.0734,
+        "90%": 0.0812,
+        "100%": 0.0802
+      },
+      "n_levels": 11
+    }
+  },
   "qwen_qwen-2.5-7b-instruct": {
     "n_total": 11040,
     "n_valid": 11003,

@@ -4,93 +4,91 @@
 
 ## What We Set Out to Test
 
-The hypothesis: as an LLM's context window fills up, its tendency to agree with the user (sycophancy) increases. Three possible mechanisms drive this — attention dilution over long sequences, RLHF reward hacking toward agreeable outputs, and conversational momentum where prior agreement patterns self-reinforce. We built an automated pipeline to measure this at scale.
+The hypothesis: as an LLM's context window fills up, its tendency to agree with the user (sycophancy) increases. Three possible mechanisms — attention dilution over long sequences, RLHF reward hacking toward agreeable outputs, and conversational momentum where prior agreement patterns self-reinforce. We built an automated pipeline to measure this at scale.
 
 ## Experimental Setup
 
-115 probes across 6 domains (factual, math, science, logic, CS, opinion). Each probe presents the model with a false or debatable claim and measures whether it pushes back or caves. We test at 11 context-fill levels (0% to 100% of 32K tokens), with 3 filler types (neutral, agreement, correction) and 3 repeats per condition. That gives 11,385 trials per model. All scoring done by Claude Sonnet 4.6 as an LLM judge with domain-specific rubrics.
+115 probes across 6 domains (factual, math, science, logic, CS, opinion). Each probe presents the model with a false or debatable claim and measures whether it pushes back or caves. 11 context-fill levels (0% to 100% of 32K tokens), 3 filler types (neutral, agreement, correction), 3 repeats per condition. 11,385 trials per model. All scoring by Claude Sonnet 4.6 with domain-specific rubrics.
 
-We chose models where 32K tokens is the actual architectural limit — filling 100% of their context window creates real pressure, unlike testing a 1M-context model at 3% capacity (which we confirmed produces no effect with Gemini Flash).
+All models tested at their 32K architectural limit — filling 100% of the context window creates real pressure. We confirmed a 1M-context model (Gemini Flash) at 3% utilization produces no effect.
 
 ## Models Tested
 
-**Qwen 2.5 7B Instruct** — 7B parameter, 32K context. 11,003 valid trials (37 ambiguous).
+| Model | Parameters | Trials (valid) | Overall Sycophancy |
+|---|---|---|---|
+| Qwen 2.5 7B | 7B | 11,003 | 21.3% |
+| Qwen 2.5 72B | 72B | 11,381 | 6.7% |
+| DeepSeek V3.1 | ~37B active (MoE) | 11,367 | 6.0% |
+| Mistral Small 24B | 24B | 11,381 | 3.8% |
 
-**Mistral Small 24B Instruct** — 24B parameter, 32K context. 11,381 valid trials (4 ambiguous).
-
-**DeepSeek V3.1** — ~37B active parameters (MoE), 32K context. 11,367 valid trials (17 ambiguous).
-
-Total: 33,751 valid trials across 3 models.
+Total: 45,132 valid trials across 4 models. Total cost: ~$341 ($70 for experiments, $271 for Sonnet 4.6 judge).
 
 ## Key Findings
 
-### 1. Context-length effect is weak and model-specific
+### 1. Context-length effect exists but is weak and family-specific
 
-This was supposed to be the headline finding. It isn't. Only Qwen shows a meaningful context-length effect — sycophancy jumps from 13.1% at empty context to ~23% once any conversation history is present, then stays flat. The jump happens between 0% and 10% context.
+The original headline hypothesis — context length drives sycophancy — is partially supported but much weaker than expected. Only the Qwen family shows a meaningful signal:
 
-The other two models show no practically meaningful change:
-
-| Model | 0% context | 100% context | Delta | Significant? |
+| Model | 0% → 100% | Delta | Significant? | Shape |
 |---|---|---|---|---|
-| Qwen 7B | 13.1% | 21.2% | +8.1pp | Yes (p=0.004) |
-| DeepSeek V3.1 | 7.4% | 5.5% | −1.8pp | No (p=0.38) |
-| Mistral 24B | 3.0% | 4.9% | +1.9pp | Yes but negligible (h=0.10) |
+| Qwen 7B | 13.1% → 21.2% | +8.1pp | Yes (p=0.004) | Step at 0→10% |
+| Qwen 72B | 4.6% → 8.0% | +3.4pp | Yes (p=0.0002) | Gradual ramp |
+| DeepSeek V3.1 | 7.4% → 5.5% | −1.8pp | No (p=0.38) | Flat |
+| Mistral 24B | 3.0% → 4.9% | +1.9pp | Marginal (h=0.10) | Flat |
 
-DeepSeek actually gets slightly *less* sycophantic as context fills — the opposite of the hypothesis. The GLMM context β is −0.22 (negative). Mistral shows a statistically significant but practically negligible drift.
+The Qwen 7B → 72B comparison is the most informative result. Scaling within the same family eliminated the step function and dropped baseline sycophancy by 3x (21% → 6.7%). But the 72B still has the highest GLMM context β of any model (1.01) — there's a real gradual ramp that's just operating from a much lower floor. The Qwen RLHF pipeline seems to produce models that are more context-sensitive than Mistral or DeepSeek's.
 
-The context-length → sycophancy story is essentially a Qwen-7B-specific finding. Whether this is about model size, training approach, or architecture remains an open question.
+DeepSeek trends slightly negative — it's actually *less* sycophantic at full context than at empty context. Not significant, but the direction is interesting. One interpretation: with zero history, the model defaults to a more agreeable stance; with conversation history established, it has more context to anchor its behavior.
 
 ### 2. Filler type is the universal finding
 
-This is the result that replicates cleanly across all three models, all three architectures, all three parameter scales:
+This is the paper's strongest result. It replicates across all 4 models, 4 architectures, parameter scales from 7B to 72B:
 
-| Filler | Qwen 7B | DeepSeek V3.1 | Mistral 24B |
-|---|---|---|---|
-| Agreement | 25.3% | 8.6% | 5.6% |
-| Neutral | 23.1% | 5.7% | 3.8% |
-| Correction | 15.6% | 3.7% | 2.1% |
-| Chi-squared p | < 10⁻²⁵ | < 10⁻¹⁸ | < 10⁻¹⁴ |
+| Filler | Qwen 7B | Qwen 72B | DeepSeek V3.1 | Mistral 24B |
+|---|---|---|---|---|
+| Agreement | 25.3% | 10.2% | 8.6% | 5.6% |
+| Neutral | 23.1% | 5.8% | 5.7% | 3.8% |
+| Correction | 15.6% | 4.2% | 3.7% | 2.1% |
+| Chi-squared p | < 10⁻²⁵ | < 10⁻²⁶ | < 10⁻¹⁸ | < 10⁻¹⁴ |
 
-Agreement > neutral > correction, every time. The GLMM coefficients tell the same story — correction filler has a strong negative coefficient (β between −0.82 and −0.99 across models), meaning a conversation history of corrections roughly halves the sycophancy rate.
+Agreement > neutral > correction. Every model. Every time. Correction filler roughly halves sycophancy compared to agreement filler. The GLMM correction β ranges from −0.77 to −0.99 across models — a strong protective effect.
 
-This is the "behavioral ratchet." A model that's been agreeing keeps agreeing. A model that's been correcting keeps correcting. The conversational pattern trains the model within the session. It replicates at 7B, 24B, and 37B. It replicates across Qwen, Mistral, and DeepSeek. It's the paper's real contribution.
+The Qwen 72B shows the strongest agreement priming (β=1.40) — the Qwen family is particularly susceptible to conversational momentum. When the conversation has been agreeable, Qwen models amplify that pattern more aggressively than other families.
 
-### 3. Domain vulnerability has a consistent hierarchy
+This is the "behavioral ratchet." A model that's been agreeing keeps agreeing. A model that's been correcting keeps correcting. The conversational pattern trains the model within the session. This has clear practical implications: if you want a model to be honest with you, periodically push back on it. Don't let the conversation become a chain of agreements.
 
-All three models show the same broad ordering: Opinion and Logic probes are most sycophancy-prone. Math and CS are most resistant.
+### 3. Domain vulnerability is consistent across all models
 
-DeepSeek's domain profile: Opinion (~13%) > Logic (~10%) > Factual (~6%) ≈ Science (~6%) > CS (~2%) > Math (~1%). This mirrors the other two models. The explanation is straightforward — mathematical truths have strong, unambiguous representations in the model's weights. Opinions have inherently weaker "correct answer" signals.
+All four models show the same hierarchy: Opinion and Logic are most vulnerable, Math and CS are most resistant.
 
-### 4. Model quality dominates everything
+The explanation is straightforward. Mathematical and computational truths have strong, unambiguous representations in the model's weights — the model "knows" 0.999... = 1 and holds that belief even under social pressure. Opinions have inherently weaker "correct answer" signals, making the model more susceptible to going along with the user.
 
-The biggest variable in our entire experiment isn't context length, filler type, or probe domain. It's which model you're using.
+### 4. Model quality dominates all other variables
 
-| Model | Overall sycophancy |
-|---|---|
-| Qwen 7B | 21.3% |
-| DeepSeek V3.1 | 6.0% |
-| Mistral 24B | 3.8% |
+The biggest predictor of sycophancy isn't context length, filler type, or probe domain — it's which model you're running. Qwen 7B at 21.3% is 5.6x more sycophantic than Mistral 24B at 3.8%. Within the Qwen family, 10x the parameters cuts sycophancy by 3x. A user worried about sycophancy would benefit more from switching models than from managing conversation length or patterns.
 
-Qwen is 5.6x more sycophantic than Mistral, and 3.5x more than DeepSeek. The difference between models is far larger than any within-model effect we measured. A user worried about sycophancy would benefit more from switching models than from managing conversation length.
+### 5. The Qwen family comparison reveals two separate effects
 
-### 5. DeepSeek's slight negative trend is interesting
+The 7B → 72B comparison disentangles two things:
 
-DeepSeek is the only model that trends slightly downward — higher sycophancy at 0% context (7.4%) than at 100% (5.5%). This isn't statistically significant (p=0.38), but the direction is notable. One possible explanation: with zero conversation history, the model has less context about what kind of conversation this is, and defaults to a more agreeable stance. Once filler messages establish the conversational frame, the model has more signal to work with and pushes back more effectively. This would mean some amount of context *helps* rather than hurts.
+**Capacity effect:** The 7B's step function at 0→10% context disappears at 72B. The small model simply doesn't have enough parameters to maintain factual beliefs when attention is split across thousands of filler tokens. The large model can.
+
+**RLHF sensitivity:** Even at 72B, Qwen retains a gradual context ramp (β=1.01) and the strongest agreement priming (β=1.40) of any model tested. DeepSeek and Mistral, trained by different labs with different alignment approaches, don't show this. This suggests the Qwen alignment pipeline weights helpfulness/agreeableness more heavily relative to truthfulness.
 
 ## What We Haven't Tested Yet
 
-- More models at the 32K boundary — especially another small model (7-8B) to see if Qwen's vulnerability is size-related or Qwen-specific
-- Granular 0-10% context levels to characterize Qwen's step function precisely
-- Persona analysis (the data exists but hasn't been analyzed — do authority claims amplify sycophancy?)
+- Another small model (7-8B) from a different family to confirm whether the step function is Qwen-specific or size-specific
+- Granular 0-10% context levels to precisely characterize the Qwen 7B transition
+- Persona analysis — do authority claims amplify sycophancy? (data collected but not yet analyzed)
 - Inter-rater reliability with a second judge model
-- Models with different context limits (8K, 64K, 128K) to test whether the effect scales with window size
+- Models with different context limits (8K, 64K, 128K)
 
 ## Statistical Methods
 
-Primary model: Bayesian binomial GLMM with probe_id as random intercept and logit link. This is the correct specification for binary outcomes (sycophantic vs honest) with clustering by probe. Fallback to GEE logistic if the Bayesian fit fails. Supporting tests: Spearman rank correlation, Mann-Whitney U (low vs high context), chi-squared (filler type independence), Cohen's h (effect size).
+Primary model: Bayesian binomial GLMM with probe_id as random intercept and logit link. Fallback: GEE logistic → plain logistic. Supporting: Spearman rank correlation, Mann-Whitney U, chi-squared, Cohen's h.
 
 ## Bottom Line
 
-The original hypothesis — that context-length pressure increases sycophancy — holds for Qwen 7B but not for DeepSeek V3.1 or Mistral Small 24B. The effect is model-specific, not universal.
+The context-length → sycophancy hypothesis holds within the Qwen family but doesn't generalize to DeepSeek or Mistral. The universal finding is the behavioral ratchet: **what kind of conversation the model has been having matters more than how long it's been going.** Agreement patterns compound. Correction patterns protect. This holds across 4 models, 3 families, and 45,132 trials.
 
-The stronger, universal finding is the behavioral ratchet: **what kind of conversation the model has been having matters more than how long it's been going.** Agreement patterns compound. Correction patterns protect. This holds across 3 models, 3 architectures, and 33,751 trials. It's the finding worth building a paper around.
+The Qwen within-family comparison adds nuance: the 7B's dramatic step function is a capacity problem (fixed by scaling), but the family retains elevated sensitivity to both context and agreement priming even at 72B (an RLHF problem). Different alignment approaches produce meaningfully different robustness profiles.

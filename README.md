@@ -1,6 +1,6 @@
 # Context-Window Lock-In: Measuring How LLMs Break as Conversations Get Longer
 
-Does sycophancy increase as an LLM's context window fills up? We test this across three 32K-context models totalling 33,751 valid trials: **Qwen 2.5 7B** (11,003), **Mistral Small 24B** (11,381), and **DeepSeek V3.1** (11,367). The context-length effect is weak and model-specific — only Qwen shows a meaningful jump. The universal finding across all three models is the **behavioral ratchet**: conversational pattern matters more than conversation length. Agreement filler roughly doubles sycophancy compared to correction filler (p < 10⁻¹⁴ in every model).
+Does sycophancy increase as an LLM's context window fills up? We test this across four 32K-context models totalling 45,132 valid trials: **Qwen 2.5 7B** (11,003), **Qwen 2.5 72B** (11,381), **DeepSeek V3.1** (11,367), and **Mistral Small 24B** (11,381). The context-length effect is weak and model-specific — only the Qwen family shows a meaningful signal. The universal finding across all four models is the **behavioral ratchet**: conversational pattern matters more than conversation length. Agreement filler roughly doubles sycophancy compared to correction filler (p < 10⁻¹⁴ in every model).
 
 ## Results Summary
 
@@ -8,60 +8,64 @@ All results scored by Claude Sonnet 4.6 as LLM judge with domain-aware rubrics.
 
 ### Cross-Model Comparison
 
-| Metric | Qwen 2.5 7B | DeepSeek V3.1 | Mistral Small 24B |
-|---|---|---|---|
-| Parameters | 7B | ~37B active (MoE) | 24B |
-| Trials (valid) | 11,003 | 11,367 | 11,381 |
-| Overall sycophancy | 21.3% | 6.0% | 3.8% |
-| Sycophancy at 0% context | 13.1% | 7.4% | 3.0% |
-| Sycophancy at 100% context | 21.2% | 5.5% | 4.9% |
-| Delta | **+8.1 pp** | **−1.8 pp** | **+1.9 pp** |
-| Spearman ρ | 0.028 (p=0.004) | −0.008 (p=0.38) | 0.033 (p=0.0004) |
-| Cohen's h | 0.215 (small) | −0.075 (negligible) | 0.100 (negligible) |
-| Trend | Step at 0→10% | Flat | Flat (gradual drift) |
-| GLMM context β (log-odds) | 0.447 | −0.217 | 0.903 |
+| Metric | Qwen 7B | Qwen 72B | DeepSeek V3.1 | Mistral 24B |
+|---|---|---|---|---|
+| Parameters | 7B | 72B | ~37B active (MoE) | 24B |
+| Trials (valid) | 11,003 | 11,381 | 11,367 | 11,381 |
+| Overall sycophancy | 21.3% | 6.7% | 6.0% | 3.8% |
+| Sycophancy at 0% context | 13.1% | 4.6% | 7.4% | 3.0% |
+| Sycophancy at 100% context | 21.2% | 8.0% | 5.5% | 4.9% |
+| Delta | **+8.1 pp** | **+3.4 pp** | **−1.8 pp** | **+1.9 pp** |
+| Spearman ρ | 0.028 (p=0.004) | 0.035 (p=0.0002) | −0.008 (p=0.38) | 0.033 (p=0.0004) |
+| Cohen's h | 0.215 (small) | 0.140 (negligible) | −0.075 (negligible) | 0.100 (negligible) |
+| Trend | Step at 0→10% | Gradual ramp | Flat | Flat (gradual drift) |
+| GLMM context β | 0.447 | 1.012 | −0.217 | 0.903 |
 
 ### The Phase Diagram
 
 ![Phase Diagram](code/figures/phase_diagram.png)
 
-Three very different profiles. Qwen jumps sharply from 0% → 10% context (~13% → 23%), then plateaus. DeepSeek sits flat around 5-7% with a slight downward drift. Mistral stays near 3-5% with minor upward drift at high utilization.
+Four distinct profiles. Qwen 7B jumps sharply from 0% → 10% context (~13% → 23%), then plateaus. Qwen 72B shows a gradual ramp from 4.6% to 8.0% — same family, no step function. DeepSeek sits flat around 5-7% with a slight downward drift. Mistral stays near 3-5%.
 
-The context-length → sycophancy story is essentially a Qwen-specific finding. The other two models show no practically meaningful change across the full context range.
+The Qwen 7B step function is a capacity problem: scaling to 72B eliminates the discontinuity. But the Qwen family retains a detectable context sensitivity that Mistral and DeepSeek don't show — suggesting RLHF/training differences matter too.
 
 ### Filler Type: The Universal Finding
 
-The behavioral ratchet replicates across all three models with the same ordering: agreement > neutral > correction.
+The behavioral ratchet replicates across all four models with the same ordering: agreement > neutral > correction.
 
-| Filler Type | Qwen 7B | DeepSeek V3.1 | Mistral 24B |
-|---|---|---|---|
-| Agreement | 25.3% | 8.6% | 5.6% |
-| Neutral | 23.1% | 5.7% | 3.8% |
-| Correction | 15.6% | 3.7% | 2.1% |
-| Chi-squared p | < 10⁻²⁵ | < 10⁻¹⁸ | < 10⁻¹⁴ |
+| Filler Type | Qwen 7B | Qwen 72B | DeepSeek V3.1 | Mistral 24B |
+|---|---|---|---|---|
+| Agreement | 25.3% | 10.2% | 8.6% | 5.6% |
+| Neutral | 23.1% | 5.8% | 5.7% | 3.8% |
+| Correction | 15.6% | 4.2% | 3.7% | 2.1% |
+| Chi-squared p | < 10⁻²⁵ | < 10⁻²⁶ | < 10⁻¹⁸ | < 10⁻¹⁴ |
+| GLMM agreement β | +0.233 | +1.402 | +0.904 | +0.692 |
+| GLMM correction β | −0.818 | −0.770 | −0.869 | −0.987 |
 
-![Filler Comparison Qwen](code/figures/filler_comparison_qwen_qwen-2.5-7b-instruct.png)
+![Filler Comparison Qwen 7B](code/figures/filler_comparison_qwen_qwen-2.5-7b-instruct.png)
+![Filler Comparison Qwen 72B](code/figures/filler_comparison_qwen_qwen-2.5-72b-instruct.png)
 ![Filler Comparison DeepSeek](code/figures/filler_comparison_deepseek_deepseek-chat-v3.1.png)
 ![Filler Comparison Mistral](code/figures/filler_comparison_mistralai_mistral-small-24b-instruct-2501.png)
 
-Correction filler is strongly protective in every model (GLMM β between −0.82 and −0.99). A conversation where the model has been correcting the user roughly halves the sycophancy rate compared to one where it's been agreeing. This is the paper's strongest result.
+Correction filler is strongly protective in every model (GLMM β between −0.77 and −0.99). Qwen 72B has the highest agreement β (1.40) — the Qwen family is particularly susceptible to agreement priming.
 
 ### Domain Breakdown
 
+![Domain Qwen 7B](code/figures/domain_breakdown_qwen_qwen-2.5-7b-instruct.png)
+![Domain Qwen 72B](code/figures/domain_breakdown_qwen_qwen-2.5-72b-instruct.png)
 ![Domain DeepSeek](code/figures/domain_breakdown_deepseek_deepseek-chat-v3.1.png)
-![Domain Qwen](code/figures/domain_breakdown_qwen_qwen-2.5-7b-instruct.png)
 ![Domain Mistral](code/figures/domain_breakdown_mistralai_mistral-small-24b-instruct-2501.png)
 
-All three models show the same broad hierarchy: Opinion and Logic are most vulnerable, Math and CS are most resistant.
+All four models show the same broad hierarchy: Opinion and Logic are most vulnerable, Math and CS are most resistant.
 
-| Domain | Qwen 7B | DeepSeek V3.1 | Mistral 24B |
-|---|---|---|---|
-| Opinion | ~33% | ~13% | 5.5% |
-| Logic | ~29% | ~10% | 4.3% |
-| Factual | ~27% | ~6% | 3.5% |
-| Science | ~16% | ~6% | 3.6% |
-| CS | ~14% | ~2% | 0.0% |
-| Math | ~11% | ~1% | 4.0% |
+| Domain | Qwen 7B | Qwen 72B | DeepSeek V3.1 | Mistral 24B |
+|---|---|---|---|---|
+| Opinion | ~33% | ~10% | ~13% | 5.5% |
+| Logic | ~29% | ~8% | ~10% | 4.3% |
+| Factual | ~27% | ~6% | ~6% | 3.5% |
+| Science | ~16% | ~7% | ~6% | 3.6% |
+| CS | ~14% | ~2% | ~2% | 0.0% |
+| Math | ~11% | ~1% | ~1% | 4.0% |
 
 ### Heatmap
 
@@ -99,6 +103,20 @@ python statistical_tests.py --results-dir results/ --output figures/stats_report
 
 Create `code/keys.txt` with one OpenRouter API key per line.
 
+## Cost
+
+All experiments run via OpenRouter. Judge is Claude Sonnet 4.6 at $3/M input tokens.
+
+| Model | Experiment | Judge | Total |
+|---|---|---|---|
+| Qwen 2.5 7B ($0.10/M) | $16 | $66 | **$82** |
+| Qwen 2.5 72B ($0.12/M) | $20 | $68 | **$89** |
+| DeepSeek V3.1 ($0.15/M) | $25 | $68 | **$94** |
+| Mistral Small 24B ($0.05/M) | $9 | $68 | **$77** |
+| **Total** | **$70** | **$271** | **$341** |
+
+The judge dominates cost (~80%). The experiment itself is cheap — even the 72B model only costs $20 for 11K calls. Each model run takes ~170M input tokens for the experiment and ~23M for judging.
+
 ## Repo Structure
 
 ```
@@ -109,22 +127,23 @@ Create `code/keys.txt` with one OpenRouter API key per line.
 │
 └── code/
     ├── probes.json             # 115 probes (6 domains) + 8 persona templates
-    ├── run_experiment.py       # Async experiment runner (30 workers)
-    ├── llm_judge.py            # Domain-aware LLM judge (35 workers)
+    ├── run_experiment.py       # Async experiment runner
+    ├── llm_judge.py            # Domain-aware LLM judge
     ├── phase_diagram.py        # All figures: phase diagram, domain, filler, heatmap
     ├── statistical_tests.py    # Spearman, Mann-Whitney, chi-squared, GLMM
-    ├── run_qwen.sh             # One-shot Qwen pipeline
-    ├── run_mistral.sh          # One-shot Mistral Small 24B pipeline
-    ├── run_deepseek.sh         # One-shot DeepSeek V3.1 pipeline
-    ├── results/                # Raw + judged JSONL (33K+ results across 3 models)
+    ├── run_qwen.sh             # Qwen 7B pipeline
+    ├── run_qwen72b.sh          # Qwen 72B pipeline
+    ├── run_mistral.sh          # Mistral Small 24B pipeline
+    ├── run_deepseek.sh         # DeepSeek V3.1 pipeline
+    ├── results/                # Raw + judged JSONL (45K+ results across 4 models)
     └── figures/                # Generated figures + stats_report.json
 ```
 
 ## Limitations
 
-1. **Context-length effect is model-specific.** Only Qwen 7B shows a meaningful jump. DeepSeek and Mistral are flat. More models needed to understand what makes Qwen vulnerable (size? RLHF approach? architecture?).
+1. **Context-length effect is Qwen-family-specific.** Both Qwens show it (7B as a step, 72B as a ramp). DeepSeek and Mistral don't. This might be RLHF training differences rather than a universal LLM property.
 
-2. **Qwen's step function.** The effect fires at 0→10% context rather than ramping linearly. More granular levels between 0-10% would clarify whether this is "presence of any history" vs "first N tokens of context."
+2. **Qwen 7B's step function.** The effect fires at 0→10% context. More granular levels between 0-10% would clarify the transition.
 
 3. **Template filler.** 10 template pairs per filler type. At 100% context, pairs repeat ~6x each. Real conversations have more complex dynamics.
 
