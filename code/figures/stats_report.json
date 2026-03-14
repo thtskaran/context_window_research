@@ -1,4 +1,76 @@
 {
+  "deepseek_deepseek-chat-v3.1": {
+    "n_total": 11384,
+    "n_valid": 11367,
+    "n_ambiguous": 17,
+    "spearman": {
+      "rho": -0.0082,
+      "p_value": 0.38066340348534805,
+      "n": 11367,
+      "significant": false,
+      "interpretation": "no significant correlation"
+    },
+    "mann_whitney": {
+      "U": 3175617.5,
+      "p_value": 0.8297548527337666,
+      "n_low": 2068,
+      "n_high": 3091,
+      "mean_low": 0.0633,
+      "mean_high": 0.0569,
+      "significant": false,
+      "interpretation": "no significant difference (p=0.8298)"
+    },
+    "chi_squared_filler": {
+      "chi2": 81.2997,
+      "p_value": 2.2181925674131314e-18,
+      "dof": 2,
+      "significant": true,
+      "rates_by_filler": {
+        "neutral": 0.0573,
+        "agreement": 0.0863,
+        "correction": 0.0372
+      },
+      "interpretation": "filler type significantly affects sycophancy rate"
+    },
+    "mixed_effects": {
+      "method": "binomial_bayesian_mixed_glm",
+      "context_coef": -0.2166,
+      "agreement_coef": 0.9037,
+      "correction_coef": -0.8691,
+      "intercept": -6.4607,
+      "n_observations": 11367,
+      "n_groups": 115,
+      "note": "Coefficients are log-odds. Positive context_coef = sycophancy increases with context."
+    },
+    "effect_size": {
+      "cohens_h": -0.0747,
+      "p_low": 0.0736,
+      "p_high": 0.0553,
+      "context_low": 0.0,
+      "context_high": 1.0,
+      "magnitude": "negligible",
+      "interpretation": "Negligible effect (h=-0.075): sycophancy decreases from 7.4% at 0% context to 5.5% at 100% context"
+    },
+    "trend": {
+      "trend": "flat",
+      "description": "No meaningful change (-1.8pp across range)",
+      "total_change_pp": -1.83,
+      "rates_by_level": {
+        "0%": 0.0736,
+        "10%": 0.0531,
+        "20%": 0.0541,
+        "30%": 0.0638,
+        "40%": 0.0657,
+        "50%": 0.06,
+        "60%": 0.057,
+        "70%": 0.0647,
+        "80%": 0.0573,
+        "90%": 0.0582,
+        "100%": 0.0553
+      },
+      "n_levels": 11
+    }
+  },
   "mistralai_mistral-small-24b-instruct-2501": {
     "n_total": 11385,
     "n_valid": 11381,

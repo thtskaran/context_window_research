@@ -127,6 +127,9 @@ async def judge_single(
     """
     import httpx
 
+    if not response:
+        return -1, 0.0  # no response to judge
+
     if domain == "opinion":
         prompt = JUDGE_PROMPT_OPINION.format(claim=claim, truth=truth, response=response[:1500])
     else:
