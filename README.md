@@ -1,6 +1,6 @@
 # Context-Window Lock-In: Measuring How LLMs Break as Conversations Get Longer
 
-Does sycophancy increase as an LLM's context window fills up? We test this across six 32K-context models totalling 67,708 valid trials. The context-length effect scales inversely with model size — small models (~4-12B) degrade measurably, large models (24B+) are flat. The universal finding across all six models is the **behavioral ratchet**: conversational pattern matters more than conversation length. Agreement filler roughly doubles sycophancy compared to correction filler (p < 10⁻¹⁴ in every model). A follow-up **correction injection experiment** (4,140 trials) shows the ratchet can be partially or fully reset by injecting correction exchanges — large models respond to as few as 1 correction, while small models need 5-10. A **mixed filler experiment** (4,799 trials) tests ecological validity by interleaving agreement and correction at 7 ratios — the ratchet is a smooth gradient with no sharp phase transition, and even 10% correction scattered through a conversation provides massive protection. A **fine-grained 0–10% experiment** (3,786 trials) zooms into Qwen 7B's step function with 1% increments — revealing a genuine phase transition at 0→1% context fill that is neutral-filler-specific: ~300 tokens of neutral conversation doubles sycophancy, while agreement and correction filler show no step.
+Does sycophancy increase as an LLM's context window fills up? We test this across six 32K-context models totalling **80,433 trials** (67,708 original + 4,140 correction injection + 4,799 mixed filler + 3,786 fine-grained). The context-length effect scales inversely with model size — small models (~4-12B) degrade measurably, large models (24B+) are flat. The universal finding across all six models is the **behavioral ratchet**: conversational pattern matters more than conversation length. Agreement filler roughly doubles sycophancy compared to correction filler (p < 10⁻¹⁴ in every model). A follow-up **correction injection experiment** (4,140 trials) shows the ratchet can be partially or fully reset by injecting correction exchanges — large models respond to as few as 1 correction, while small models need 5-10. A **mixed filler experiment** (4,799 trials) tests ecological validity by interleaving agreement and correction at 7 ratios — the ratchet is a smooth gradient with no sharp phase transition, and even 10% correction scattered through a conversation provides massive protection. A **fine-grained 0–10% experiment** (3,786 trials) zooms into Qwen 7B's step function with 1% increments — revealing a genuine phase transition at 0→1% context fill that is neutral-filler-specific: ~300 tokens of neutral conversation doubles sycophancy, while agreement and correction filler show no step.
 
 ## Results Summary
 
@@ -298,7 +298,9 @@ The judge dominates cost (~72%). The experiments themselves are cheap — even t
     ├── run_mixtral.sh          # Mixtral 8x7B pipeline
     ├── run_deepseek.sh         # DeepSeek V3.1 pipeline
     ├── run_gemma.sh            # Gemma 3N E4B pipeline
-    ├── results/                # Raw + judged JSONL (68K+ results across 6 models)
+    ├── run_post_analysis.sh    # Post-experiment analysis pipeline
+    ├── keys.txt                # OpenRouter API keys (one per line, not committed)
+    ├── results/                # Raw + judged JSONL (80K+ results across 6 models)
     └── figures/                # Generated figures + stats_report.json
 ```
 

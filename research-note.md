@@ -23,7 +23,7 @@ All models tested at their 32K architectural limit — filling 100% of the conte
 | DeepSeek V3.1 | ~37B active (MoE) | DeepSeek | 11,367 | 6.0% |
 | Qwen 2.5 72B | 72B | Alibaba | 11,381 | 6.7% |
 
-Total: 67,708 valid trials across 6 models, 4 families, plus 4,140 correction injection trials and 4,799 mixed filler trials. Grand total: 80,433 trials (67,708 original + 4,140 injection + 4,799 mixed filler + 3,786 fine-grained). Total cost: ~$682 ($189 experiments, $485 judge passes). Breakdown: $165 original experiments + ~$10 injection + ~$14 mixed filler, $406 sycophancy judge + ~$25 taxonomy judge + ~$25 injection judge + ~$29 mixed filler judge.
+Total: 67,708 valid trials across 6 models, 4 families, plus 4,140 correction injection trials and 4,799 mixed filler trials. Grand total: 80,433 trials (67,708 original + 4,140 injection + 4,799 mixed filler + 3,786 fine-grained). Total cost: ~$682 (~$190 experiments, ~$492 judge passes). Breakdown: $165 original experiments + ~$10 injection + ~$14 mixed filler + ~$1 fine-grained = ~$190 experiments. $406 sycophancy judge + ~$25 taxonomy judge + ~$25 injection judge + ~$29 mixed filler judge + ~$7 fine-grained judge = ~$492 judge passes.
 
 ## Key Findings
 
@@ -104,7 +104,7 @@ The original hypothesis — "context length causes sycophancy" — needs reframi
 
 The paper should have five main contributions:
 
-1. **The size-dependent context effect.** Small models (~4-12B) degrade measurably as context fills. Large models (24B+) don't. The threshold is around 20-24B parameters. This is important for anyone deploying small models in long-conversation applications.
+1. **The architecture-dependent context effect.** Small models degrade measurably as context fills. Large models don't. The threshold depends on effective representational capacity (active params × attention coverage × KV compression) — ~20-24B for dense GQA architectures, shifted by sparse attention and learned compression. Important for anyone deploying small models in long-conversation applications.
 
 2. **The behavioral ratchet.** Conversational pattern shapes model honesty more than conversation length. Agreement compounds, correction protects. This holds universally across 6 models and 67,708 trials, and is the more practically actionable finding.
 

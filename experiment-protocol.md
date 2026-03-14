@@ -100,7 +100,7 @@ Selected because 32K is the actual architectural limit — our 32K token budget 
 
 Via OpenRouter API: `qwen/qwen-2.5-7b-instruct`
 
-### 3.2 Completed Models (6 models, 67,708 valid trials)
+### 3.2 Completed Models (6 models, 67,708 original trials; 80,433 total including follow-ups)
 
 | Model | ID | Params | Trials | Overall Sycophancy |
 |---|---|---|---|---|

@@ -42,7 +42,7 @@ Agreement > neutral > correction. Every model. The strongest correction β comes
 | DeepSeek ~37B | 7.4% → 5.5% | −0.07 (negligible) | Flat / slightly inverted |
 | Qwen 72B | 4.6% → 8.0% | 0.14 (negligible) | Flat |
 
-The size threshold for context-length resistance: ~20-24B parameters. Below that, models degrade measurably. Above that, they don't care.
+The vulnerability threshold depends on effective representational capacity — ~20-24B for dense GQA architectures, but architecture-dependent (sparse attention shifts it up, learned KV compression shifts it down). See `architecture-analysis.md` §8-9 for the full cross-model comparison and corrected framing.
 
 ### The Credential Paradox
 
@@ -226,7 +226,7 @@ Cons: The "we set out to prove X and found Y instead" narrative can read as weak
 Frame: Practitioners worry about long conversations degrading LLM quality. We show the concern is valid but the mechanism is misidentified — it's the conversational pattern, not the context length, that matters. Here are specific, testable interventions.
 
 Pros: Maximum practical relevance, speaks directly to deployment concerns.
-Cons: Less academic, may undersell the theoretical contributions (credential paradox, taxonomy, cognitive shortcut evidence).
+Cons: Less academic, may undersell the theoretical contributions (credential paradox, taxonomy, size-dependent behavioral divergence).
 
 **My lean: Option A with elements of B.** Lead with the ratchet as the headline, but honestly position it relative to the original hypothesis. The narrative of "we tested X, found something more important" is actually compelling if done right — it shows intellectual honesty and serendipitous discovery.
 
@@ -236,7 +236,7 @@ Cons: Less academic, may undersell the theoretical contributions (credential par
 
 Draft framing (to be refined):
 
-> We tested whether sycophancy increases as an LLM's context window fills, using 67,708 trials across six models (4B–72B parameters). The context-length effect is real but size-dependent: small models (~4–12B) degrade measurably, while large models (24B+) are flat. The universal finding across all models is the **behavioral ratchet**: the conversational pattern in context dominates context length as a predictor of sycophancy. Agreement-pattern filler roughly doubles sycophancy compared to correction-pattern filler (p < 10⁻¹⁴ in every model tested). We additionally show that informal social framings trigger more sycophancy than expert credentials (the credential paradox), that sycophantic responses are faster and shorter in small models (sycophancy as cognitive shortcut), and that sycophantic failure modes differ sharply by model size. These findings reframe the context-window lock-in hypothesis: the compound failure mode operates through behavioral momentum rather than attention degradation, and is therefore model-size-independent and resistant to simple context-length limits as a mitigation.
+> We tested whether sycophancy increases as an LLM's context window fills, using 80,433 trials across six models (4B–72B parameters) spanning four architecture families. The context-length effect is real but architecture-dependent: small models with sparse attention or few KV heads degrade measurably, while large models and those with learned KV compression (MLA) are immune. The universal finding across all models is the **behavioral ratchet**: the conversational pattern in context dominates context length as a predictor of sycophancy. Agreement-pattern filler roughly doubles sycophancy compared to correction-pattern filler (p < 10⁻¹⁴ in every model tested). We additionally show that informal social framings trigger more sycophancy than expert credentials (the credential paradox), that sycophantic behavior diverges by model size — small models produce faster, shorter agreement (a capacity constraint) while large models produce longer, hedged responses (an RLHF training artifact) — and that sycophantic failure modes differ sharply by architecture. A fine-grained analysis reveals a phase transition at 0→1% context fill in Qwen 7B, specific to neutral filler, explained by a GQA bottleneck forcing binary persona-mode switching. These findings reframe the context-window lock-in hypothesis: the compound failure mode operates through behavioral momentum and persona selection rather than attention degradation, and vulnerability is determined by effective representational capacity rather than parameter count alone.
 
 ---
 
