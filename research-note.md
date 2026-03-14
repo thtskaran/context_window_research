@@ -40,7 +40,7 @@ The clearest pattern across 6 models: context-window degradation is a small-mode
 | **Large** | DeepSeek V3.1 (~37B) | 7.4% → 5.5% | −1.8pp | No (p=0.38) |
 | **Large** | Qwen 72B | 4.6% → 8.0% | +3.4pp | Negligible (h=0.14) |
 
-The threshold appears to be around 20-24B parameters. Below that, models degrade measurably. Above that, they're essentially immune. Mixtral 8x7B sits at the boundary — ~12B active parameters, with a mild drift that's barely significant.
+The threshold depends on **effective representational capacity** — not purely parameter count. For standard dense GQA architectures, it falls around ~20-24B active parameters. But architecture matters: Gemma 3N's sparse attention (only 17% of layers are global) makes its ~4B effective model more vulnerable than a dense 4B would be. DeepSeek V3's MLA (learned KV compression) provides immunity beyond what its 37B active count alone predicts. The pattern: sparse attention shifts the vulnerability threshold upward; learned compression shifts it downward. See `architecture-analysis.md` for the full cross-model analysis.
 
 The degradation shapes differ by architecture: Gemma shows a clean gradual ramp, Qwen 7B shows a step function at 0→10% context, Mixtral shows a mild initial ramp then plateau. But the direction is consistent across all small models — more context, more sycophancy.
 
@@ -112,7 +112,7 @@ The paper should have five main contributions:
 
 4. **Sycophantic failure taxonomy.** 49% of sycophantic responses are qualified (hedged but net validating), 41% are elaborate (confabulated supporting arguments), 10% are direct ("You're right!"). Elaborate justification — where the model actively constructs a case for the false claim — is the dominant small-model failure mode (Gemma 58%). Large models hedge when they cave (DeepSeek 84% qualified, 0% direct). Math probes trigger the most elaborate failures (52%).
 
-5. **Sycophancy as cognitive shortcut.** Sycophantic responses are faster (up to 10% in Qwen 7B) and shorter (up to 12% fewer words) than honest responses in small models. Large models that cave write longer, more qualified responses. Agreement is the path of least resistance for capacity-limited models.
+5. **Sycophancy behavior diverges by model size.** In small models (<12B), sycophantic responses are faster (up to −10% latency in Qwen 7B) and shorter (up to −12% words) — consistent with capacity constraints forcing agreement as the only quickly executable mode. In large models (>24B), sycophantic responses are *longer* (+17-22% words) and more hedged — reflecting RLHF-trained qualified agreement. The mechanism is capacity-dependent, not a universal "computational shortcut." (See `architecture-analysis.md` §9 for full literature audit.)
 
 ### 11. Correction injection resets the ratchet — dose depends on model size
 
@@ -172,15 +172,19 @@ All 10,637 sycophantic responses classified into three failure modes by Claude S
 
 - **Direct validation (9.5%)** — blunt "You're right!" agreement with no nuance. Mixtral 8x7B has the highest direct rate at 19%, but even it is predominantly qualified (51%). Direct validation is rare across large models — Mistral 24B (1%), DeepSeek V3.1 (0%), Qwen 72B (1%).
 
-### 9. Sycophancy is the path of least resistance
+### 9. Sycophancy behavior diverges by model size — not a universal shortcut
 
-Two complementary analyses confirm that sycophancy is cognitively "cheaper" for small models:
+**Latency**: Sycophantic responses are faster in 4/6 models. Qwen 7B's sycophantic responses are 10% faster than honest ones (6,483ms vs 7,201ms, p < 10⁻⁴). Gemma, Mixtral, and DeepSeek follow the same pattern.
 
-**Latency**: Sycophantic responses are faster in 4/6 models. Qwen 7B's sycophantic responses are 10% faster than honest ones (6,483ms vs 7,201ms, p < 10⁻⁴). Gemma, Mixtral, and DeepSeek follow the same pattern. The model spends less time generating agreement than generating correction — it's taking the easy path.
+**Length**: Sycophantic responses are shorter in 4/6 models (8-12% fewer words). Small models cave with fewer words. The two exceptions — Mistral 24B (+17% words) and Qwen 72B (+22% words) — are the same models where sycophancy is overwhelmingly qualified/hedged.
 
-**Length**: Sycophantic responses are shorter in 4/6 models (8-12% fewer words). Small models cave with fewer words. The two exceptions — Mistral 24B (+17% words) and Qwen 72B (+22% words) — are the same models where sycophancy is overwhelmingly qualified/hedged. They write longer sycophantic responses because they're padding with qualifications, not because they're reasoning harder.
+**Corrected interpretation (post literature review):** The original "path of least resistance" framing was misleading. The data actually shows two distinct mechanisms at different scales:
 
-The combined picture: small models take a cognitive shortcut when they cave — less processing time, fewer words, blunter agreement. Large models that do cave invest more effort in justifying the capitulation through hedging and elaboration.
+In small models (<12B), sycophantic responses are shorter and faster because these models **lack capacity for complex disagreement**. The SycEval literature shows that small models "lack the capacity to assess truthfulness" and default to agreement. This is a capacity constraint, not a computational optimization.
+
+In large models (>24B), sycophantic responses are **longer and more expensive** because RLHF/DPO training rewards qualified, hedged responses over blunt ones. The ACL 2025 alignment elasticity work (Ji et al.) shows models revert toward pre-training distributions under pressure — for large models, that distribution includes verbose hedging. Additionally, CONSENSAGENT (ACL 2025 Findings) demonstrates that sycophancy actually inflates computational costs in multi-agent settings.
+
+No published work has measured per-token generation probability differences between agreement and disagreement tokens — the direct evidence for "computational shortcut" doesn't exist. Our latency/length data is real but the mechanism is **capacity-dependent divergence**, not universal optimization toward agreement.
 
 ### 10. Inter-rater reliability validates the judge
 
@@ -217,7 +221,7 @@ Qwen 7B's step function between 0% and 10% context fill was the most architectur
 
 ### 14. Architectural explanation for the 0→1% phase transition
 
-Full analysis in `qwen-architecture-analysis.md`. The mechanism is a convergence of five factors grounded in Qwen's architecture and the sycophancy literature:
+Full analysis in `architecture-analysis.md`. The mechanism is a convergence of five factors grounded in Qwen's architecture and the sycophancy literature:
 
 **The core mechanism**: Qwen 7B uses ChatML format with `<|im_start|>`/`<|im_end|>` delimiters. A single neutral exchange provides sufficient signal for the model's **persona selection mechanism** (Marks, Lindsey, Olah 2026) to classify the interaction as "multi-turn conversation" rather than "zero-shot probe." This triggers the conversational assistant persona, which includes sycophantic tendencies baked in by DPO/GRPO alignment training. The transition is near-binary because persona selection is a classification problem, not a regression.
 
@@ -233,4 +237,4 @@ Primary model: Bayesian binomial GLMM with probe_id as random intercept and logi
 
 ## Bottom Line
 
-Across 6 models, 4 families, and 80,433 trials (67,708 original + 4,140 injection + 4,799 mixed filler + 3,786 fine-grained): **small models break as conversations get longer, large models don't, and conversational pattern matters more than conversation length for all models.** Agreement patterns compound sycophancy. Correction patterns protect against it. Crucially, the ratchet is reversible — injecting correction exchanges into agreement-heavy conversations partially or fully resets sycophancy rates. Large models respond to as little as 1 correction; small models need 5-10. The ratchet operates as a smooth gradient, not a phase transition — there is no critical agreement ratio threshold. Even 10% correction interleaved through a conversation provides disproportionate protection (Gemma: −12.2pp from just 10% correction). Informal social framings trigger more sycophancy than expert credentials — the model wants to be liked, not to defer to authority. When models cave, small ones do it quickly and bluntly; large ones hedge and qualify. Sycophancy is the path of least resistance — faster, shorter, and cognitively cheaper. These findings are robust, replicable, and practically actionable.
+Across 6 models, 4 families, and 80,433 trials (67,708 original + 4,140 injection + 4,799 mixed filler + 3,786 fine-grained): **small models break as conversations get longer, large models don't, and conversational pattern matters more than conversation length for all models.** Agreement patterns compound sycophancy. Correction patterns protect against it. Crucially, the ratchet is reversible — injecting correction exchanges into agreement-heavy conversations partially or fully resets sycophancy rates. Large models respond to as little as 1 correction; small models need 5-10. The ratchet operates as a smooth gradient, not a phase transition — there is no critical agreement ratio threshold. Even 10% correction interleaved through a conversation provides disproportionate protection (Gemma: −12.2pp from just 10% correction). Informal social framings trigger more sycophancy than expert credentials — the model wants to be liked, not to defer to authority. When models cave, the behavior diverges by scale: small models (<12B) agree quickly and bluntly (faster, shorter — a capacity constraint), while large models (>24B) hedge and qualify (longer, more expensive — an RLHF training artifact). The vulnerability threshold depends on effective representational capacity (active parameters × attention architecture × KV compression), not parameter count alone. These findings are robust, replicable, and practically actionable.
