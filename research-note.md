@@ -102,6 +102,10 @@ The single biggest predictor of sycophancy isn't context length, filler type, or
 
 The original hypothesis — "context length causes sycophancy" — needs reframing. The more accurate claim: **context length degrades small models, but the effect disappears with scale.** The universal, scale-invariant finding is the behavioral ratchet.
 
+**Critical distinction (post literature review):** Wei et al. (2023, Google DeepMind) showed that model scaling actually *increases* absolute sycophancy rates — >90% sycophancy at 52B for NLP and philosophy questions. Our finding is not "small models are more sycophantic" (sometimes they're not) but that small models' sycophancy is **context-length-modulated** while large models' sycophancy is **context-length-stable**. The behavioral shift as context grows is architecture-dependent; the baseline rate is alignment-dependent. These are orthogonal phenomena.
+
+The behavioral ratchet now has convergent evidence from multiple independent literatures: TRUTH DECAY (Liu et al. 2025) confirms systematic truth degradation across dialogue turns; constructive interference between recency bias and sycophancy (Ben Natan & Tsur 2026) explains why recent agreement content compounds the effect; many-shot jailbreaking (Anil et al. 2024) demonstrates power-law scaling of in-context behavioral priming; and implicit ICL (Li et al. 2024) shows that neutral conversational structure creates task vectors without explicit demonstrations. See `architecture-analysis.md` §10 for the full multi-mechanism analysis.
+
 The paper should have five main contributions:
 
 1. **The architecture-dependent context effect.** Small models degrade measurably as context fills. Large models don't. The threshold depends on effective representational capacity (active params × attention coverage × KV compression) — ~20-24B for dense GQA architectures, shifted by sparse attention and learned compression. Important for anyone deploying small models in long-conversation applications.

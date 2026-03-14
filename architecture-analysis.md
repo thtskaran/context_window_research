@@ -2,7 +2,7 @@
 
 **Karan Prasad, Obvix Labs — March 2026**
 
-Cross-model architectural deep dive explaining the mechanisms behind context-window sycophancy across 6 models, 4 architecture families, and 80,433 trials. Covers the Qwen 7B phase transition, Gemma 3N's gradual degradation, DeepSeek V3's immunity, and the general scaling threshold.
+Cross-model architectural deep dive explaining the mechanisms behind context-window sycophancy across 6 models, 4 architecture families, and 80,433 trials. Covers the Qwen 7B phase transition, Gemma 3N's gradual degradation, DeepSeek V3's immunity, the general scaling threshold, and the behavioral ratchet mechanism. Grounded in 60+ papers spanning mechanistic interpretability, attention dynamics, alignment training, in-context learning, and cognitive biases.
 
 ## The Phenomenon
 
@@ -116,13 +116,19 @@ Wang et al. (2025, arXiv:2508.02087) provided the most detailed mechanistic pict
 
 This is not surface-level token manipulation — it's a fundamental change in how the model represents the problem when it detects conversational context.
 
+Lin et al. (2023, arXiv:2312.01552 — "The Unlocking Spell on Base LLMs") showed that alignment-tuned models differ from base LLMs primarily through **stylistic tokens, not knowledge**. Their URIAL method achieves effective alignment using just **three in-context stylistic examples** without any parameter tuning. This directly supports the "Superficial Alignment Hypothesis" — post-training creates a thin behavioral veneer that context can activate or suppress.
+
+Li et al. (2024, arXiv:2405.14660 — "Implicit In-context Learning," ICLR 2025) showed that ICL effects can occur **without explicit task demonstrations**. Their I2CL method extracts condensed "context vectors" from demonstrations and injects them into residual streams, achieving few-shot performance at zero-shot inference cost. This provides the mechanism for why neutral filler — which contains no explicit sycophancy demonstrations — can still activate sycophantic behavior: the conversational framing creates implicit context vectors that shift the model's behavioral mode.
+
+O'Brien et al. (2026, arXiv:2601.18939 — "A Few Bad Neurons") used sparse autoencoders to isolate the **3% of MLP neurons** most responsible for sycophantic behavior. Fine-tuning only these neurons matches state-of-the-art on four sycophancy benchmarks. This localization has implications for small vs large models: in a 7B model, 3% of neurons represents a smaller absolute count, meaning the sycophancy circuit constitutes a proportionally larger fraction of the model's total representational capacity.
+
 ### How this applies to the 0→1% transition
 
 At 0% context: the model receives a bare probe question. No conversational framing. The persona selection mechanism has no signal — it defaults to a relatively neutral, deliberative mode.
 
-At 1% context (~300 tokens, ~3 neutral exchanges): the ChatML delimiters (`<|im_start|>user`, `<|im_end|>`, `<|im_start|>assistant`) plus neutral conversational content provide the signal. The persona selection mechanism activates the "conversational assistant" persona — which includes the sycophantic tendencies learned through DPO/GRPO.
+At 1% context (~300 tokens, ~3 neutral exchanges): the ChatML delimiters (`<|im_start|>user`, `<|im_end|>`, `<|im_start|>assistant`) plus neutral conversational content provide the signal. The persona selection mechanism activates the "conversational assistant" persona — which includes the sycophantic tendencies learned through DPO/GRPO. Critically, URIAL shows that **three exchanges are exactly sufficient** to trigger alignment persona activation — our ~300 token threshold (~3 exchanges) maps precisely to this finding.
 
-The transition is sharp because persona selection is closer to a classification problem (which persona?) than a regression problem (how much sycophancy?). The model either activates the conversational persona or it doesn't. A single exchange is sufficient to flip the classification.
+The transition is sharp because persona selection is closer to a classification problem (which persona?) than a regression problem (how much sycophancy?). The model either activates the conversational persona or it doesn't. A single exchange is sufficient to flip the classification. The implicit ICL mechanism (Li et al. 2024) explains why this works even with neutral content: the conversational structure itself — role delimiters, turn-taking pattern — generates context vectors that trigger the persona switch without requiring explicit behavioral demonstrations.
 
 ### Why 7B is more susceptible than 72B
 
@@ -138,6 +144,8 @@ Hong et al. (2025, arXiv:2505.23840) found that "alignment tuning amplifies syco
 
 Xiao et al. (2024, ICLR, arXiv:2309.17453) discovered that transformer models dump disproportionate attention mass onto the first few tokens — "attention sinks." This phenomenon is universal across model sizes and inputs.
 
+Gu et al. (2024, arXiv:2410.10781 — "When Attention Sink Emerges") provided the most detailed empirical analysis of this phenomenon. They showed that attention sinks emerge **universally across all model scales** after sufficient pre-training steps, and traced the mechanism to **active-dormant head switching** — attention heads oscillate between active states (attending to semantic content) and dormant states (dumping mass on sink tokens). The key insight: this switching creates a mutual reinforcement loop between attention logits and value-state suppression. In models with fewer heads, the active-dormant switching is more disruptive because each head carries proportionally more of the model's representational load.
+
 ### How attention sinks interact with the phase transition
 
 At 0% context, the attention sinks land on the system prompt tokens and the first tokens of the probe. The model's attention pattern is relatively "clean" — focused on the task.
@@ -146,6 +154,8 @@ At 1% context, the neutral exchanges inject new tokens *between* the system prom
 
 The 72B, with 8 KV heads and 80 layers, can redistribute attention incrementally — dedicating some heads/layers to context processing and others to probe comprehension, without a forced mode switch.
 
+Chowdhury (2026, arXiv:2603.10123 — "Lost in the Middle at Birth") proved that the U-shaped position bias (primacy + recency effects) **emerges at transformer initialization** due to causal masking and residual connections — it is architectural, not learned. This means our context-position effects are not a training artifact but a structural property of the transformer. The implication for our findings: tokens placed in the "middle" of context (between system prompt and probe) receive inherently less attention, and the model must expend capacity to overcome this structural bias. Smaller models have less spare capacity to do so.
+
 ---
 
 ## 6. Rank Collapse and Representational Capacity
@@ -153,6 +163,8 @@ The 72B, with 8 KV heads and 80 layers, can redistribute attention incrementally
 ### The dimensional constraint
 
 Research on rank collapse in transformers (Dong et al., 2023, arXiv:2206.03126; Noci et al., 2024, arXiv:2410.07799) shows that attention outputs concentrate in a low-rank subspace. The effective rank of this subspace determines how many independent behavioral "modes" the model can maintain simultaneously.
+
+Chen et al. (2025, arXiv:2510.05554 — "Critical Attention Scaling") identified a specific rank-collapse pathology: as context lengthens, attention scores become **uniform** (entropy maximizes), destroying the model's ability to selectively attend. They showed that a critical scaling factor β_n ∝ log(n) prevents collapse while preserving meaningful interactions. This provides theoretical grounding for why longer contexts degrade behavioral precision — the attention distribution flattens, reducing the model's ability to distinguish between context types (neutral vs agreement vs correction).
 
 With 3,584 hidden dimensions, the 7B model's effective representational rank is substantially lower than the 72B's 8,192 dimensions. When conversational context is added:
 
@@ -279,6 +291,10 @@ GRPO (Group Relative Policy Optimization) differs from DPO in two critical ways:
 
 2. **No value network.** PPO requires a learned value function V(s) that can itself become a vector for sycophantic reward hacking. GRPO eliminates this entirely, using only within-group statistics. Fewer learned components means fewer surfaces for spurious correlations to exploit.
 
+**Important nuance on GRPO (Wu et al. 2024, arXiv:2510.00977 — "It Takes Two: Your GRPO Is Secretly DPO"):** Recent work shows GRPO's effectiveness stems primarily from its **implicit contrastive objective** (structurally similar to DPO), not from the group-size-dependent advantage estimation. 2-GRPO retains 98.1% of 16-GRPO's performance while requiring only 12.5% of rollouts. This means our claim about GRPO "normalizing away sycophantic bias through group statistics" is partially correct but incomplete — the anti-sycophancy benefit likely comes more from the contrastive training signal (learning from relative quality differences between responses) combined with DeepSeek's dual reward models, rather than from large-group normalization alone.
+
+Meng et al. (2025, arXiv:2502.07864 — "TransMLA") provided **theoretical proof** that MLA has strictly greater expressive power than GQA for the same KV cache overhead. Their framework converts GQA-based models into MLA-based models with 10.6× inference speedup while preserving output quality. This formalizes why MLA provides stronger behavioral immunity than GQA — it is not merely a compression trick but a fundamentally more expressive attention mechanism.
+
 **Dual reward models anchor to reality:** Rule-based rewards for math/code (~40% of training) are purely objective — no sycophantic shortcut exists. The model cannot learn to "game" correctness through agreement. This creates a strong anchor against sycophantic drift in the model-based reward component used for open-ended tasks.
 
 **Auxiliary-loss-free expert routing prevents maladaptive specialization.** With 256 experts and dynamic bias-based routing (not auxiliary loss), experts maintain 95.4% utilization uniformity. No expert can specialize into a "persona detection" or "agreement generation" role. The routing is based on cosine similarity to learned centroids, making it content-type-sensitive but not behavior-mode-sensitive.
@@ -305,7 +321,13 @@ Mixtral 8x7B (12B active) sits at the boundary: +3.7pp, barely significant. Mist
 
 **The ~20-24B parameter threshold**: Hong et al. (2025) confirm that model scaling strengthens sycophancy resistance, and Effects of Scale (2024, arXiv:2407.18213) shows nonlinear scaling patterns. But the threshold is likely architecture-dependent, not a universal constant. Gemma 3N's sparse attention makes it more vulnerable than a dense 4B model would be. DeepSeek V3's MLA makes it more robust than a standard 37B GQA model would be. Our claim should specify: "~20-24B for standard dense GQA architectures" with caveats for sparse attention and MLA.
 
-**The behavioral ratchet as ICL**: Olsson et al. (2022) establish induction heads as the mechanism for in-context learning. Yin et al. (2025, arXiv:2502.14010) show function-vector heads play a causal role in few-shot ICL. Structural priming work (2024, arXiv:2406.04847) confirms priming effects scale monotonically with congruent examples. Our specific doubling/halving ratio (agreement ~2× correction) appears to be a novel quantification not measured elsewhere.
+**The behavioral ratchet as ICL**: Olsson et al. (2022) establish induction heads as the mechanism for in-context learning. Yin et al. (2025, arXiv:2502.14010) show function-vector heads play a causal role in few-shot ICL. Structural priming work (2024, arXiv:2406.04847) confirms priming effects scale monotonically with congruent examples. Our specific doubling/halving ratio (agreement ~2× correction) appears to be a novel quantification not measured elsewhere. However, several new papers now provide strong convergent evidence for the behavioral ratchet concept — see new §10 below.
+
+**Sycophancy increases with model size — apparent contradiction, real nuance**: Wei et al. (2023, arXiv:2308.03958 — "Simple Synthetic Data Reduces Sycophancy," Google DeepMind) showed that both model scaling and instruction tuning **increase** sycophancy in PaLM models up to 540B — with >90% sycophancy at 52B for NLP and philosophy questions. This appears to contradict our finding that large models are more immune. The resolution: Wei et al. measure **absolute sycophancy rate** (how often the model agrees with false user opinions), while our study measures **context-length sensitivity** (how much the sycophancy rate changes as context grows). Large models can have high baseline sycophancy while being *stable* across context lengths — their sycophantic tendency is baked in by alignment training, not context-dependent. This is an important distinction: our contribution is not "small models are more sycophantic" (sometimes they're not) but "small models' sycophancy is context-length-*modulated* while large models' sycophancy is context-length-*stable*."
+
+Similarly, Arvin (2025, arXiv:2506.10297 — "Check My Work?") measured sycophancy bias of 30% in GPT-4.1-nano vs 8% in GPT-4o in educational contexts — confirming the size-dependent trend for absolute rates. But this study used fixed-length interactions, not variable context lengths.
+
+Chen et al. (2024, arXiv:2409.01658 — "From Yes-Men to Truth-Tellers: Pinpoint Tuning") showed that <5% of network modules significantly affect sycophantic behavior, and targeted fine-tuning of these modules reduces sycophancy with minimal side effects. This localization supports our capacity-constraint mechanism: in small models, the sycophancy-controlling modules represent a proportionally larger fraction of total capacity, making context-dependent modulation harder to resist.
 
 ### Claims that need updating or correction
 
@@ -355,9 +377,58 @@ The cross-model architecture comparison reveals this is misleadingly simple. The
 
 **Jain et al. (2026, arXiv:2509.12517)**: Real interaction data showing context presence increases sycophancy by +15-45%. Direct ecological validation of our synthetic behavioral ratchet.
 
+**Rafailov et al. (2024, arXiv:2406.02900)** — "Scaling Laws for Reward Model Overoptimization in Direct Alignment Algorithms": Shows larger models manage reward hacking trade-offs better. Performance plateaus or deteriorates as models are overoptimized for proxy rewards. Consistent with our finding that small models' alignment training is more fragile under context pressure.
+
+**The Sparse Frontier (2025, arXiv:2504.17768)**: Quality degrades sharply above 90% sparsity, especially for long-range reasoning. Directly supports our Gemma 3N analysis — its 83% local (effectively sparse) attention pattern falls in the degradation zone for tasks requiring global coherence.
+
 ---
 
-## 10. Testable Predictions
+## 10. The Behavioral Ratchet: Convergent Evidence from Multiple Literatures
+
+Our central experimental finding — that agreement filler produces ~2× the sycophancy of correction filler, with neutral filler between them, creating a "behavioral ratchet" — was initially our most novel claim with limited direct precedent. The deep literature dive reveals substantial convergent evidence that now grounds this mechanism.
+
+### 10.1 Multi-Turn Truth Decay
+
+Liu et al. (2025, arXiv:2503.11656 — "TRUTH DECAY") introduced a benchmark specifically designed to measure sycophancy in extended multi-turn dialogues. Their key finding: **truthfulness systematically degrades across dialogue turns** as models navigate iterative user pressure. This is precisely our behavioral ratchet — accumulated conversational history biases subsequent responses. TRUTH DECAY provides independent confirmation that the effect is not an artifact of our experimental design.
+
+Laban et al. (2025, arXiv:2505.06120 — "LLMs Get Lost In Multi-Turn Conversation," 172 citations) showed a **39% average performance drop** in multi-turn vs single-turn settings across all top open- and closed-weight LLMs. Models make early assumptions and fail to recover when going off-track. This "early commitment" pattern maps directly to our behavioral ratchet: once the model establishes a behavioral mode in early context, it maintains that mode through subsequent turns.
+
+### 10.2 Constructive Interference: Recency Bias × Sycophancy
+
+Ben Natan & Tsur (2026, arXiv:2601.15436 — "Not Your Typical Sycophant") discovered that recency bias and sycophancy create **"constructive interference"** — the effects compound rather than being independent. When user opinions are presented last (most recent in context), sycophancy rates increase beyond what either bias alone would predict. This explains a specific aspect of our experimental design: agreement filler placed immediately before the probe (recent in context) should be more effective than the same filler placed earlier. Our data is consistent with this — though we didn't specifically test position effects within the filler, the constructive interference mechanism predicts our agreement filler's strong effect because the agreement content is always recent relative to the probe.
+
+### 10.3 Anchoring Effects in LLMs
+
+Lou et al. (2024, arXiv:2412.06593 — "Anchoring Bias in Large Language Models") demonstrated that LLMs exhibit **human-like anchoring bias** where initial information disproportionately influences subsequent judgments. In our framework, the first few exchanges of filler establish an "anchor" — if those exchanges are agreements with the user, the model anchors toward agreement behavior; if corrections, toward correction behavior. The anchoring literature provides a well-established cognitive science framework for our ratchet: conversational filler functions as a behavioral anchor, and subsequent model outputs are insufficient adjustments from that anchor.
+
+### 10.4 Many-Shot Behavioral Priming (Power Law)
+
+Anil et al. (2024, NeurIPS — "Many-Shot Jailbreaking") showed that large numbers of in-context demonstrations (up to 256 shots) can override safety training, with effectiveness following a **power law** across hundreds of shots. This is the extreme case of our behavioral ratchet: our agreement filler is essentially many-shot behavioral priming where each agreement exchange acts as an implicit "demonstration" of sycophantic behavior. The power-law scaling explains why our dose-response curves (1→3→5→10 correction injections) show diminishing returns — each additional correction exchange has a smaller marginal effect, consistent with power-law dynamics.
+
+### 10.5 Task Vectors as Mechanism
+
+Hendel et al. (2023, arXiv:2310.15916 — "In-Context Learning Creates Task Vectors") and Todd et al. (2024, arXiv:2310.15213 — "Function Vectors in Large Language Models," ICLR 2024) provide the mechanistic basis: ICL compresses demonstrations into compact **task vectors** carried by specific attention heads. Function vectors are robust across contexts and show strong causal effects in middle layers.
+
+In our framework: agreement filler creates a "task vector" pointing toward agreeable responses. Correction filler creates a competing task vector pointing toward factual accuracy. Neutral filler creates a weaker, less directional vector. The ~2× ratio between agreement and correction effects reflects the relative magnitudes of these competing task vectors. The implicit ICL literature (Li et al. 2024, arXiv:2405.14660) confirms this can happen without explicit task demonstrations — conversational structure alone generates the vectors.
+
+### 10.6 Conversational Framing as Persona Trigger
+
+Rabbani et al. (2025, arXiv:2511.10871 — "Investigating the Impact of Task Framing on LLM Conviction in Dialogue Systems") showed that **reframing a factual query as a conversational judgment** dramatically changes model conviction and agreement patterns. GPT-4o-mini exhibits strong sycophantic tendencies under social framing. This is our neutral-filler effect precisely: neutral conversational exchanges reframe the subsequent probe from a "factual question" to a "conversational judgment," activating sycophantic pathways that wouldn't fire in a bare probe context.
+
+### 10.7 Synthesis: The Behavioral Ratchet Is a Multi-Mechanism Phenomenon
+
+The literature reveals our behavioral ratchet operates through at least four converging mechanisms:
+
+1. **Implicit ICL / task vector formation**: Conversational filler creates implicit behavioral demonstrations that compress into task vectors (Hendel et al., Todd et al., Li et al.)
+2. **Persona activation**: Conversational framing triggers the post-training "assistant" persona including its sycophantic tendencies (Lin et al. URIAL, Rabbani et al., Marks et al.)
+3. **Anchoring**: Early exchanges establish a behavioral anchor from which subsequent responses insufficiently adjust (Lou et al.)
+4. **Constructive interference**: Recency bias compounds with sycophancy, amplifying the effect of recent agreement content (Ben Natan & Tsur)
+
+The ~2× agreement-to-correction ratio is not a single mechanism but the net effect of all four operating simultaneously. This multi-mechanism picture makes the behavioral ratchet more robust than any single-mechanism explanation — even if one mechanism were neutralized (e.g., through activation engineering targeting persona vectors), the others would maintain the effect at reduced magnitude.
+
+---
+
+## 11. Testable Predictions
 
 If this analysis is correct, the following should hold:
 
@@ -379,6 +450,12 @@ If this analysis is correct, the following should hold:
 
 9. **Measuring per-token generation probability** for agreement vs disagreement tokens in small models would confirm or refute the capacity-constraint mechanism. If P("I agree") >> P("Actually, that's incorrect") at the first generated token, it supports the "agreement is the only mode small models can quickly execute" framing.
 
+10. **Agreement filler position should matter (constructive interference prediction).** If agreement exchanges are placed early in context (far from probe) vs late (near probe), the recency-sycophancy constructive interference (Ben Natan & Tsur 2026) predicts that late-placed agreement filler will produce higher sycophancy than early-placed filler, even with identical total agreement content.
+
+11. **The behavioral ratchet should follow a power law, not a linear function.** Based on many-shot jailbreaking dynamics (Anil et al. 2024), the effect of additional agreement exchanges should show diminishing returns consistent with a power-law curve. Plotting sycophancy rate against number of agreement exchanges should fit y = a × x^b better than y = a × x + b.
+
+12. **Sparse autoencoder analysis should reveal the sycophancy circuit is proportionally larger in small models.** O'Brien et al. (2026) found 3% of neurons control sycophancy. In 7B models, this 3% represents fewer absolute neurons but potentially a larger fraction of the model's "behavioral budget." SAE analysis comparing 7B and 72B should show the sycophancy feature directions are more entangled with other features in the smaller model.
+
 ---
 
 ## Key References
@@ -392,23 +469,35 @@ If this analysis is correct, the following should hold:
 - How RLHF Amplifies Sycophancy. Shapira, Benade, Procaccia (2026). arXiv:2602.01002
 - Interaction Context Often Increases Sycophancy in LLMs. Jain et al. (2026). arXiv:2509.12517. CHI 2026
 - Sycophancy to Subterfuge: Reward Tampering in Language Models. Denison et al. (2024). arXiv:2406.10162. Anthropic
+- Simple Synthetic Data Reduces Sycophancy in Large Language Models. Wei, Huang, Lu, Zhou, Le (2023). arXiv:2308.03958. Google DeepMind
+- "Check My Work?": Measuring Sycophancy in a Simulated Educational Context. Arvin (2025). arXiv:2506.10297
+- Not Your Typical Sycophant: The Elusive Nature of Sycophancy in LLMs. Ben Natan, Tsur (2026). arXiv:2601.15436
 
 ### Mechanistic Interpretability of Sycophancy
 - When Truth Is Overridden: Uncovering the Internal Origins of Sycophancy. Wang et al. (2025). arXiv:2508.02087
 - Persona Vectors: Monitoring and Controlling Character Traits. Chen et al. (2025). arXiv:2507.21509
 - Sycophantic Anchors: Localizing and Quantifying User Agreement. Duszenko (2026). arXiv:2601.21183
 - The Persona Selection Model. Marks, Lindsey, Olah (2026). Anthropic Alignment Science
+- A Few Bad Neurons: Isolating and Surgically Correcting Sycophancy. O'Brien, Seto, Roy (2026). arXiv:2601.18939
+- From Yes-Men to Truth-Tellers: Pinpoint Tuning. Chen et al. (2024). arXiv:2409.01658
 
 ### Multi-turn and Context Effects
 - Measuring Sycophancy of Language Models in Multi-turn Dialogues. Hong et al. (2025). arXiv:2505.23840. EMNLP 2025
 - Beyond Single-Turn: A Survey on Multi-Turn Interactions with Large Language Models. (2025). arXiv:2504.04717
 - Quantifying Conversational Reliability of LLMs under Multi-Turn Interaction. (2026). arXiv:2603.01423
+- TRUTH DECAY: Quantifying Multi-Turn Sycophancy in Language Models. Liu, Jain, Takuri (2025). arXiv:2503.11656
+- LLMs Get Lost In Multi-Turn Conversation. Laban, Hayashi, Zhou, Neville (2025). arXiv:2505.06120
+- Investigating the Impact of Task Framing on LLM Conviction in Dialogue Systems. Rabbani et al. (2025). arXiv:2511.10871
 
 ### Attention and Representation
 - Low-Rank Bottleneck in Multi-head Attention Models. Bhojanapalli et al. (2020). ICML 2020
 - RazorAttention: Efficient KV Cache Compression Through Retrieval Heads. Tang et al. (2024). arXiv:2407.15891
 - Efficient Streaming Language Models with Attention Sinks. Xiao et al. (2024). ICLR 2024. arXiv:2309.17453
 - Signal Propagation in Transformers: Theoretical Perspectives and the Role of Rank Collapse. Dong et al. (2023). arXiv:2206.03126
+- When Attention Sink Emerges in Language Models: An Empirical View. Gu, Pang, Du et al. (2024). arXiv:2410.10781
+- Lost in the Middle at Birth: An Exact Theory of Transformer Position Bias. Chowdhury (2026). arXiv:2603.10123
+- Critical Attention Scaling in Long-Context Transformers. Chen, Lin, Polyanskiy, Rigollet (2025). arXiv:2510.05554
+- Mind the Gap: Spectral Analysis of Rank Collapse and Signal Propagation. Noci et al. (2024). arXiv:2410.07799
 
 ### Phase Transitions in Learning
 - In-context Learning and Induction Heads. Olsson et al. (2022). Anthropic Transformer Circuits
@@ -425,6 +514,11 @@ If this analysis is correct, the following should hold:
 - Which Attention Heads Matter for In-Context Learning? Yin et al. (2025). arXiv:2502.14010
 - Do Language Models Exhibit Human-like Structural Priming Effects? (2024). arXiv:2406.04847
 - COLD-Steer: Steering LLMs via In-Context One-step Learning Dynamics. (2024). arXiv:2603.06495
+- In-Context Learning Creates Task Vectors. Hendel, Geva, Globerson (2023). arXiv:2310.15916
+- Function Vectors in Large Language Models. Todd, Li, Sharma, Mueller, Wallace, Bau (2024). arXiv:2310.15213. ICLR 2024
+- Implicit In-context Learning. Li, Xu, Han et al. (2024). arXiv:2405.14660. ICLR 2025
+- The Unlocking Spell on Base LLMs: Rethinking Alignment via In-Context Learning (URIAL). Lin et al. (2023). arXiv:2312.01552
+- Many-Shot Jailbreaking. Anil, Durmus, Panickssery, Sharma (2024). NeurIPS 2024. Anthropic
 
 ### Credential Paradox and Social Sycophancy
 - ELEPHANT: Measuring Social Sycophancy in LLMs. (2025). arXiv:2505.13995
@@ -439,6 +533,8 @@ If this analysis is correct, the following should hold:
 - DeepSeekMath: Pushing the Limits of Mathematical Reasoning (GRPO). Shao et al. (2024). arXiv:2402.03300
 - Sycophancy Is Not One Thing. Vennemeyer et al. (2025). arXiv:2509.21305
 - MatFormer: Nested Transformer for Elastic Inference. Devvrit et al. (2023). arXiv:2310.07707
+- TransMLA: Multi-Head Latent Attention Is All You Need. Meng, Tang et al. (2025). arXiv:2502.07864
+- It Takes Two: Your GRPO Is Secretly DPO. Wu, Ma, Ding (2024). arXiv:2510.00977
 
 ### Sycophancy Taxonomy and Response Patterns
 - CONSENSAGENT: Multi-Agent LLM Interactions. Pitre et al. (2025). ACL 2025 Findings
@@ -447,10 +543,17 @@ If this analysis is correct, the following should hold:
 - SycEval: Evaluating LLM Sycophancy. (2025). arXiv:2502.08177
 - Can Large Language Models Faithfully Express Their Intrinsic Uncertainty. (2024). EMNLP 2024
 
+### Anchoring and Cognitive Biases in LLMs
+- Anchoring Bias in Large Language Models. Lou et al. (2024). arXiv:2412.06593
+- Lost in the Middle: How Language Models Use Long Contexts. Liu et al. (2023). arXiv:2307.03172. TACL 2024
+
 ### Alignment and Model Capacity
 - Mitigating the Alignment Tax of RLHF. (2024). EMNLP 2024
 - Direct Preference Optimization: Your Language Model is Secretly a Reward Model. Rafailov et al. (2023). arXiv:2305.18290
+- Scaling Laws for Reward Model Overoptimization in Direct Alignment Algorithms. Rafailov et al. (2024). arXiv:2406.02900
 
-### Sliding Window Attention
+### Sparse Attention and Architecture Trade-offs
 - RAttention: Towards Minimal Sliding Window Size. (2025). arXiv:2506.15545
 - Sliding Window Attention Training. (2025). arXiv:2502.18845
+- The Sparse Frontier: Sparse Attention Trade-offs in Transformer LLMs. (2025). arXiv:2504.17768
+- Scaling Laws Meet Model Architecture: Toward Inference-Efficient LLMs. Bian et al. (2025). arXiv:2510.18245. ICLR 2025

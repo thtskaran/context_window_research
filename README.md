@@ -179,7 +179,7 @@ The original experiment showed Qwen 7B jumping from 13.1% to 21.2% sycophancy be
 
 ### Architectural Explanation: Why Small Models Break
 
-Full analysis in [`architecture-analysis.md`](architecture-analysis.md), grounded in 40+ papers including Qwen/Gemma/DeepSeek/Mistral/Mixtral technical reports and mechanistic sycophancy research.
+Full analysis in [`architecture-analysis.md`](architecture-analysis.md), grounded in 60+ papers including Qwen/Gemma/DeepSeek/Mistral/Mixtral technical reports, mechanistic sycophancy research, in-context learning mechanisms, attention dynamics, and cognitive bias literature.
 
 **Each vulnerable model fails for architecture-specific reasons:**
 
@@ -192,10 +192,13 @@ Full analysis in [`architecture-analysis.md`](architecture-analysis.md), grounde
 | MLA + GRPO + ~37B active | Immune (strongest) | DeepSeek V3 | Learned KV compression + decoupled RoPE + dual reward models |
 
 **Key mechanisms identified:**
-- **Persona selection** (Marks et al. 2026): Conversational context triggers a "multi-turn assistant" persona that includes sycophantic tendencies from DPO/GRPO alignment. Near-binary classification, not gradual.
+- **Persona selection** (Marks et al. 2026): Conversational context triggers a "multi-turn assistant" persona that includes sycophantic tendencies from DPO/GRPO alignment. Near-binary classification, not gradual. URIAL (Lin et al. 2023) confirms just 3 stylistic exchanges suffice for full persona activation — matching our ~300 token (3 exchange) threshold precisely.
 - **Deep representational divergence** (Wang et al. 2025): Sycophancy involves fundamental recoding of problem representation in deeper layers, not just output token reweighting.
 - **GQA bottleneck**: Models with fewer KV heads have less capacity to maintain both "deliberative" and "conversational" representations simultaneously — they must commit to one mode.
-- **MLA immunity**: DeepSeek V3's learned compression (57× KV reduction) is adaptive — it learns what to preserve, making spurious correlations between context content and sycophancy expensive to maintain.
+- **MLA immunity**: DeepSeek V3's learned compression (57× KV reduction) is adaptive — it learns what to preserve, making spurious correlations between context content and sycophancy expensive to maintain. TransMLA (Meng et al. 2025) provides theoretical proof that MLA has strictly greater expressive power than GQA for the same KV cache overhead.
+- **Behavioral ratchet as multi-mechanism phenomenon**: The ~2× agreement-to-correction ratio operates through four converging mechanisms: implicit ICL / task vector formation (Hendel et al. 2023, Todd et al. 2024), persona activation (URIAL), anchoring bias (Lou et al. 2024), and constructive interference between recency bias and sycophancy (Ben Natan & Tsur 2026). See architecture-analysis.md §10 for full analysis.
+
+**Important distinction**: Our contribution is not "small models are more sycophantic" — Wei et al. (2023, Google DeepMind) showed scaling actually *increases* absolute sycophancy rates. Our finding is that small models' sycophancy is **context-length-modulated** while large models' sycophancy is **context-length-stable**. The behavioral shift as context grows is what's architecture-dependent, not the baseline rate.
 
 ### Heatmap
 
@@ -273,7 +276,7 @@ The judge dominates cost (~72%). The experiments themselves are cheap — even t
 ├── experiment-protocol.md      # Full experimental protocol
 ├── research-note.md            # Findings and interpretation so far
 ├── brainstorm-synthesis.md     # Contribution mapping and paper strategy
-├── architecture-analysis.md    # Cross-model architecture deep dive (40+ papers)
+├── architecture-analysis.md    # Cross-model architecture deep dive (60+ papers)
 ├── research-notes/             # Background literature review and analysis
 │
 └── code/
