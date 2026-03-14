@@ -164,7 +164,7 @@ async def judge_single(
 
         except httpx.HTTPStatusError as e:
             status = e.response.status_code
-            if status in (401, 403):
+            if status in (401, 402, 403):
                 key_pool.mark_dead(key)
             elif status == 429:
                 await asyncio.sleep(1.5 ** attempt)

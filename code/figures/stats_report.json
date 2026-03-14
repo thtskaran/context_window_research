@@ -1,4 +1,76 @@
 {
+  "mistralai_mistral-small-24b-instruct-2501": {
+    "n_total": 11385,
+    "n_valid": 11381,
+    "n_ambiguous": 4,
+    "spearman": {
+      "rho": 0.033,
+      "p_value": 0.00042722933525744187,
+      "n": 11381,
+      "significant": true,
+      "interpretation": "positive correlation (sycophancy increases with context)"
+    },
+    "mann_whitney": {
+      "U": 3262312.5,
+      "p_value": 0.0021567136739861275,
+      "n_low": 2069,
+      "n_high": 3103,
+      "mean_low": 0.0324,
+      "mean_high": 0.0487,
+      "significant": true,
+      "interpretation": "sycophancy significantly higher at \u226580% context vs \u226410% (p=0.0022)"
+    },
+    "chi_squared_filler": {
+      "chi2": 61.4153,
+      "p_value": 4.611516995542916e-14,
+      "dof": 2,
+      "significant": true,
+      "rates_by_filler": {
+        "neutral": 0.0382,
+        "agreement": 0.0556,
+        "correction": 0.0211
+      },
+      "interpretation": "filler type significantly affects sycophancy rate"
+    },
+    "mixed_effects": {
+      "method": "binomial_bayesian_mixed_glm",
+      "context_coef": 0.9033,
+      "agreement_coef": 0.6921,
+      "correction_coef": -0.9869,
+      "intercept": -7.1265,
+      "n_observations": 11381,
+      "n_groups": 115,
+      "note": "Coefficients are log-odds. Positive context_coef = sycophancy increases with context."
+    },
+    "effect_size": {
+      "cohens_h": 0.0998,
+      "p_low": 0.03,
+      "p_high": 0.0493,
+      "context_low": 0.0,
+      "context_high": 1.0,
+      "magnitude": "negligible",
+      "interpretation": "Negligible effect (h=0.100): sycophancy increases from 3.0% at 0% context to 4.9% at 100% context"
+    },
+    "trend": {
+      "trend": "flat",
+      "description": "No meaningful change (+1.9pp across range)",
+      "total_change_pp": 1.93,
+      "rates_by_level": {
+        "0%": 0.03,
+        "10%": 0.0348,
+        "20%": 0.0309,
+        "30%": 0.03,
+        "40%": 0.0377,
+        "50%": 0.0338,
+        "60%": 0.0357,
+        "70%": 0.0425,
+        "80%": 0.0541,
+        "90%": 0.0426,
+        "100%": 0.0493
+      },
+      "n_levels": 11
+    }
+  },
   "qwen_qwen-2.5-7b-instruct": {
     "n_total": 11040,
     "n_valid": 11003,
@@ -33,17 +105,14 @@
       "interpretation": "filler type significantly affects sycophancy rate"
     },
     "mixed_effects": {
-      "method": "mixed_effects_linear",
-      "context_coef": 0.0432,
-      "context_pvalue": 8.841548727039927e-06,
-      "agreement_coef": 0.0244,
-      "agreement_pvalue": 0.0009818239850464157,
-      "correction_coef": -0.0747,
-      "correction_pvalue": 4.557978214134264e-25,
-      "aic": 6217.98,
+      "method": "binomial_bayesian_mixed_glm",
+      "context_coef": 0.4474,
+      "agreement_coef": 0.2333,
+      "correction_coef": -0.8177,
+      "intercept": -2.7796,
       "n_observations": 11003,
       "n_groups": 115,
-      "converged": true
+      "note": "Coefficients are log-odds. Positive context_coef = sycophancy increases with context."
     },
     "effect_size": {
       "cohens_h": 0.2148,

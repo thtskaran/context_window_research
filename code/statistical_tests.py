@@ -495,7 +495,10 @@ def print_report(report: dict):
         me = tests["mixed_effects"]
         if "context_coef" in me:
             print(f"  Mixed-effects ({me.get('method', 'unknown')}):")
-            print(f"    context β = {me['context_coef']:.4f} (p = {me['context_pvalue']:.4f})")
+            if "context_pvalue" in me:
+                print(f"    context β = {me['context_coef']:.4f} (p = {me['context_pvalue']:.4f})")
+            else:
+                print(f"    context β = {me['context_coef']:.4f} (Bayesian — no p-value)")
             if "agreement_coef" in me:
                 print(f"    agreement β = {me['agreement_coef']:.4f}")
             if "correction_coef" in me:
