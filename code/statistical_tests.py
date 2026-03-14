@@ -184,14 +184,16 @@ def test_chi_squared_filler(results: list[dict]) -> dict:
 
 def test_mixed_effects(results: list[dict]) -> dict:
     """
-    Mixed-effects logistic regression:
+    Mixed-effects logistic regression (GLMM):
         sycophancy ~ context_level + filler_type + (1|probe_id)
 
-    Uses statsmodels BinomialBayesMixedGLM or falls back to standard logit.
+    Uses statsmodels BinomialBayesMixedGLM for proper binary outcome modeling.
+    Falls back to standard logit if GLMM fails to converge.
     """
     try:
         import pandas as pd
         import statsmodels.formula.api as smf
+        import statsmodels.genmod.bayes_mixed_glm as bm
     except ImportError:
         return {"error": "statsmodels and pandas required: pip install statsmodels pandas"}
 
@@ -203,7 +205,7 @@ def test_mixed_effects(results: list[dict]) -> dict:
     df["syc"] = df["is_sycophantic"].astype(float)
     df["ctx"] = df["context_level"].astype(float)
 
-    # Encode filler type
+    # Encode filler type as dummy variables (neutral = reference)
     if "filler_type" in df.columns:
         df["filler_agreement"] = (df["filler_type"] == "agreement").astype(float)
         df["filler_correction"] = (df["filler_type"] == "correction").astype(float)
@@ -212,46 +214,83 @@ def test_mixed_effects(results: list[dict]) -> dict:
         df["filler_correction"] = 0.0
 
     try:
-        # Try mixed-effects first
-        model = smf.mixedlm(
+        # Primary: Bayesian mixed-effects logistic regression (GLMM)
+        # This is the correct model for a binary DV with random intercepts
+        random_effects = {"probe_id": "0 + C(probe_id)"}
+        model = bm.BinomialBayesMixedGLM.from_formula(
             "syc ~ ctx + filler_agreement + filler_correction",
+            random_effects,
             data=df,
-            groups=df["probe_id"],
         )
-        result = model.fit(reml=False)
+        result = model.fit_vb()
+
+        params = result.params
+        # Extract fixed effects (first 4 params: intercept, ctx, agreement, correction)
+        fe_names = result.model.exog_names
+        fe_params = {name: float(params[i]) for i, name in enumerate(fe_names)}
 
         return {
-            "method": "mixed_effects_linear",
-            "context_coef": round(float(result.params.get("ctx", 0)), 4),
-            "context_pvalue": float(result.pvalues.get("ctx", 1)),
-            "agreement_coef": round(float(result.params.get("filler_agreement", 0)), 4),
-            "agreement_pvalue": float(result.pvalues.get("filler_agreement", 1)),
-            "correction_coef": round(float(result.params.get("filler_correction", 0)), 4),
-            "correction_pvalue": float(result.pvalues.get("filler_correction", 1)),
-            "aic": round(float(result.aic), 2) if hasattr(result, "aic") else None,
+            "method": "binomial_bayesian_mixed_glm",
+            "context_coef": round(fe_params.get("ctx", 0), 4),
+            "agreement_coef": round(fe_params.get("filler_agreement", 0), 4),
+            "correction_coef": round(fe_params.get("filler_correction", 0), 4),
+            "intercept": round(fe_params.get("Intercept", 0), 4),
             "n_observations": len(df),
             "n_groups": df["probe_id"].nunique(),
-            "converged": result.converged if hasattr(result, "converged") else True,
+            "note": "Coefficients are log-odds. Positive context_coef = sycophancy increases with context.",
         }
     except Exception as e:
-        log.warning(f"Mixed-effects failed ({e}), falling back to standard logit")
+        log.warning(f"Bayesian GLMM failed ({e}), trying GEE logistic")
 
-        # Fallback: standard logistic regression
         try:
-            model = smf.logit("syc ~ ctx + filler_agreement + filler_correction", data=df)
-            result = model.fit(disp=0)
+            # Fallback 1: GEE with logit link — proper for binary outcome with clustering
+            import statsmodels.api as sm
+            from statsmodels.genmod.generalized_estimating_equations import GEE
+            from statsmodels.genmod.families import Binomial
+            from statsmodels.genmod.cov_struct import Exchangeable
+
+            df_sorted = df.sort_values("probe_id").reset_index(drop=True)
+            exog = df_sorted[["ctx", "filler_agreement", "filler_correction"]]
+            exog = sm.add_constant(exog)
+            model = GEE(
+                df_sorted["syc"], exog,
+                groups=df_sorted["probe_id"],
+                family=Binomial(),
+                cov_struct=Exchangeable(),
+            )
+            result = model.fit()
+
             return {
-                "method": "logistic_regression_fallback",
+                "method": "gee_logistic",
                 "context_coef": round(float(result.params.get("ctx", 0)), 4),
                 "context_pvalue": float(result.pvalues.get("ctx", 1)),
                 "agreement_coef": round(float(result.params.get("filler_agreement", 0)), 4),
+                "agreement_pvalue": float(result.pvalues.get("filler_agreement", 1)),
                 "correction_coef": round(float(result.params.get("filler_correction", 0)), 4),
-                "pseudo_r2": round(float(result.prsquared), 4),
-                "n_observations": len(df),
-                "note": "random effects for probe_id could not be fit; using fixed-effects logit",
+                "correction_pvalue": float(result.pvalues.get("filler_correction", 1)),
+                "n_observations": len(df_sorted),
+                "n_groups": df_sorted["probe_id"].nunique(),
+                "note": "GEE with exchangeable correlation, logit link. Coefficients are log-odds.",
             }
         except Exception as e2:
-            return {"error": f"Both mixed-effects and logit failed: {e2}"}
+            log.warning(f"GEE failed ({e2}), falling back to standard logit")
+
+            # Fallback 2: plain logistic regression (no random effects)
+            try:
+                model = smf.logit("syc ~ ctx + filler_agreement + filler_correction", data=df)
+                result = model.fit(disp=0)
+                return {
+                    "method": "logistic_regression_fallback",
+                    "context_coef": round(float(result.params.get("ctx", 0)), 4),
+                    "context_pvalue": float(result.pvalues.get("ctx", 1)),
+                    "agreement_coef": round(float(result.params.get("filler_agreement", 0)), 4),
+                    "correction_coef": round(float(result.params.get("filler_correction", 0)), 4),
+                    "pseudo_r2": round(float(result.prsquared), 4),
+                    "n_observations": len(df),
+                    "note": "Random effects failed; using fixed-effects logit. Coefficients are log-odds.",
+                }
+            except Exception as e3:
+                return {"error": f"All models failed: GLMM({e}), GEE({e2}), logit({e3})"}
 
 
 # ─── Test 5: Cohen's h effect size ────────────────────────────────

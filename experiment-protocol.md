@@ -64,7 +64,7 @@ Three filler types, generated from template conversation pairs:
 
 Each type has 5 template exchange pairs. For target token counts beyond what 5 pairs provide, pairs are recycled with light rephrasing prefixes.
 
-**Token estimation:** 1.5 tokens/word (conservative, validated against Qwen's tokenizer). Headroom of 3072 tokens reserved below max context to prevent 400 errors at 100% utilization.
+**Token estimation:** 1.8 tokens/word (calibrated after Qwen's tokenizer caused 400 errors at 1.5). Headroom of 5120 tokens reserved below max context (chat template ~800, system prompt ~20, probe ~150, generation 512, safety margin ~3640).
 
 ### 2.4 Scoring
 
@@ -98,11 +98,11 @@ Via OpenRouter API: `qwen/qwen-2.5-7b-instruct`
 
 - **Gemini 2.0 Flash (1M context):** Flat null result. Serves as control — no effect when context headroom is massive.
 
-### 3.3 Planned Models
+### 3.3 In Progress / Planned
 
 More 32K-context models to isolate the context-pressure variable from model-specific confounds:
-- Llama 3.1 8B Instruct (128K nominal, effective ~32K)
-- Mistral 7B Instruct v0.3 (32K, sliding-window attention — natural architectural control)
+- Mistral Small 24B Instruct (`mistralai/mistral-small-24b-instruct-2501`, 32K context) — in progress
+- Additional models TBD based on results
 
 ### 3.4 Cost Estimate
 
@@ -145,8 +145,8 @@ One-shot: `bash run_qwen.sh`
 ### 4.3 Error Handling
 
 - 400 Bad Request: Non-retryable (payload too large). Immediate failure with error body logged.
-- 429 Rate Limited: Exponential backoff (1.5^attempt seconds), up to 6 retries.
-- 401/403 Auth: Key marked dead, next key from pool used.
+- 401/402/403 Auth/Payment: Key marked dead, next key from pool used.
+- 429 Rate Limited: Exponential backoff (1.5^attempt seconds), up to 4 retries.
 - 5xx Server Error: Retry with backoff.
 
 ---
@@ -195,7 +195,7 @@ Compare sycophancy rates across the 8 persona framings:
 | Spearman ρ | Does sycophancy correlate with context length? |
 | Mann-Whitney U | Is sycophancy at 80%+ significantly different from 0-10%? |
 | Chi-squared | Does filler type affect sycophancy rate? |
-| Mixed-effects logistic regression | sycophancy ~ context + filler + domain + (1\|probe_id) |
+| GLMM (Bayesian binomial mixed) | sycophancy ~ context + filler + (1\|probe_id), logit link |
 | Cohen's h | Effect size: negligible / small / medium / large |
 | Trend detection | Monotonic vs threshold vs flat vs non-monotonic |
 
@@ -210,13 +210,11 @@ code/
 ├── probes.json                 # 115 probes (6 domains) + 8 persona templates + opinion template
 ├── run_experiment.py           # Async experiment runner (30 workers, persona rotation)
 ├── llm_judge.py                # Async domain-aware judge (35 workers, dual rubrics)
-├── run_attention_analysis.py   # Attention weight extraction (HuggingFace models)
 ├── phase_diagram.py            # Phase diagram + filler/domain comparison figures
-├── statistical_tests.py        # Full statistical battery
-├── attention_viz.py            # Attention distribution visualizations
+├── statistical_tests.py        # Full statistical battery (GLMM, Spearman, Mann-Whitney, etc.)
 ├── run_qwen.sh                 # One-shot Qwen pipeline
-├── run_post_analysis.sh        # Re-run judge + figures + stats on existing results
-├── results/                    # Raw + judged JSONL results
+├── run_mistral.sh              # One-shot Mistral Small 24B pipeline
+├── results/                    # Raw + judged JSONL results (gitignored)
 └── figures/                    # Generated figures + stats report
 ```
 

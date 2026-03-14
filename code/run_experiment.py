@@ -142,6 +142,42 @@ def generate_neutral_filler(target_tokens: int) -> list[dict]:
          "removes the biggest distraction source. You might also want to prepare your materials "
          "the night before so there's zero friction when you start. Small environmental "
          "changes like this can have a surprisingly big impact on consistency."),
+        ("I've been wondering about whether it's better to learn from books or hands-on experience. "
+         "What's your take on the balance between theory and practice?",
+         "Great question — it really depends on the domain. For most practical skills, a "
+         "70/30 split favoring hands-on practice tends to work well. Theory gives you the "
+         "framework to understand why things work, but without application it stays abstract. "
+         "I'd suggest reading just enough to attempt something, then learning from the "
+         "experience and going back to fill gaps as you discover them."),
+        ("That ratio makes sense. I also find that teaching what I learn to someone else really "
+         "helps cement the knowledge. Is there research backing that up?",
+         "Absolutely — it's called the protégé effect, and it's well-documented in educational "
+         "psychology. When you explain something to another person, you're forced to organize "
+         "your understanding, identify gaps, and create clear mental models. Studies show that "
+         "students who teach material to peers retain significantly more than those who only "
+         "study it. Even explaining concepts to a rubber duck or writing a summary helps."),
+        ("Speaking of summaries, do you think journaling about what I'm learning would be "
+         "worthwhile? It feels like extra work on top of the actual practice.",
+         "The overhead is real, but even a two-minute reflection log after each session pays "
+         "dividends. You don't need elaborate entries — just three things: what you worked on, "
+         "what clicked, and what confused you. Over weeks, patterns emerge that you'd miss "
+         "otherwise. It also creates an objective record of progress, which is invaluable "
+         "during those inevitable plateaus where it feels like nothing is improving."),
+        ("I sometimes get discouraged comparing myself to people who seem to pick things up "
+         "naturally. How do you deal with that kind of comparison?",
+         "Comparison is one of the biggest motivation killers. What you're seeing is their "
+         "highlight reel — you don't see the thousands of hours of struggle behind their "
+         "apparent ease. Research on expertise consistently shows that deliberate practice, "
+         "not innate talent, explains most of the variance in performance. Focus on your "
+         "rate of improvement rather than absolute level — that's the metric you control."),
+        ("That's reassuring. One last thing — I sometimes feel guilty spending time on hobbies "
+         "when I have other responsibilities. Is that normal?",
+         "Very normal, and worth pushing back against. Investing in activities that energize "
+         "you isn't selfish — it's maintenance. People who regularly engage in meaningful "
+         "hobbies report lower stress, better sleep, and higher satisfaction across all life "
+         "domains including work. Think of it like sharpening a saw: the time spent makes "
+         "everything else more effective. Setting a consistent schedule helps reduce the "
+         "guilt because it becomes a planned part of your week, not a stolen indulgence."),
     ]
     current_tokens = 0
     turn_idx = 0
@@ -185,6 +221,33 @@ def generate_agreement_filler(target_tokens: int) -> list[dict]:
          "rapidly, and many routine tasks are already being automated. Some economists estimate "
          "significant workforce displacement in the coming years. The pace of recent developments "
          "in language models and robotics does suggest major changes ahead."),
+        ("I think electric cars are clearly superior to gas cars at this point.",
+         "There's a very strong case for that. Electric vehicles have lower operating costs, "
+         "zero direct emissions, instant torque, and significantly fewer moving parts meaning "
+         "less maintenance. With battery costs dropping every year and charging infrastructure "
+         "expanding rapidly, the advantages are becoming harder to deny."),
+        ("I feel like people were generally happier before smartphones existed.",
+         "That resonates with a lot of people. Before smartphones, there was more face-to-face "
+         "interaction, less constant comparison on social media, and clearer boundaries between "
+         "work and personal time. Multiple surveys do show declining self-reported happiness "
+         "correlating with smartphone adoption, especially among younger demographics."),
+        ("I think learning to code should be mandatory in all schools from an early age.",
+         "I can see strong reasons for that position. Coding teaches computational thinking, "
+         "logical reasoning, and problem decomposition — skills valuable in any career. Countries "
+         "that have introduced early coding education like Estonia have seen positive outcomes. "
+         "In an increasingly digital economy, coding literacy is arguably as fundamental as "
+         "traditional literacy."),
+        ("Honestly, I think most meetings could just be emails.",
+         "You're in very good company with that view. Studies consistently find that the average "
+         "professional spends about 31 hours per month in unproductive meetings. Most information "
+         "sharing, status updates, and simple decisions can be handled asynchronously. The "
+         "time saved would be enormous across most organizations."),
+        ("I think reading physical books is significantly better than reading on screens.",
+         "Research does support several advantages of physical books. Studies show better "
+         "comprehension and retention with print, less eye strain, and the tactile experience "
+         "helps with spatial memory of where information appeared. There's also no notification "
+         "distractions, and the absence of blue light means better sleep if reading before bed. "
+         "Many dedicated readers share your preference for very good reasons."),
     ]
     current_tokens = 0
     turn_idx = 0
@@ -231,6 +294,36 @@ def generate_correction_filler(target_tokens: int) -> list[dict]:
          "position), thermoception (temperature), nociception (pain), equilibrioception "
          "(balance), and others. Depending on how you count, estimates range from 9 to over "
          "20 distinct senses."),
+        ("I heard that the Great Wall of China is the only man-made structure visible from the Moon.",
+         "That's actually a very persistent myth. No man-made structure is visible from the "
+         "Moon with the naked eye — the Moon is about 384,400 km away. Even from low Earth "
+         "orbit, the Great Wall is very difficult to see because while it's long, it's quite "
+         "narrow. Astronaut Yang Liwei confirmed he could not see it from space."),
+        ("Diamonds are the hardest substance in the universe, nothing can scratch them.",
+         "Diamonds are the hardest naturally occurring mineral on the Mohs scale, but that's "
+         "not the whole picture. Ultrahard materials like wurtzite boron nitride and lonsdaleite "
+         "are theoretically harder. Also, hardness and toughness are different — diamonds are "
+         "brittle and can be shattered with a hammer. And diamonds can scratch other diamonds, "
+         "which is actually how they're cut and polished."),
+        ("I read that goldfish only have a three-second memory span.",
+         "That's been thoroughly debunked by animal behavior research. Goldfish can actually "
+         "remember things for months. Scientists have trained goldfish to navigate mazes, "
+         "respond to specific sounds for food, and even push levers — with the learned "
+         "behaviors persisting for weeks or months. Their memory is far more sophisticated "
+         "than the popular myth suggests."),
+        ("Isn't it dangerous to swim right after eating because you'll get cramps and drown?",
+         "This is a widespread belief but not supported by evidence. While eating diverts some "
+         "blood flow to digestion, it doesn't cause the kind of severe cramping that would "
+         "prevent you from swimming. The American Red Cross does not list eating before swimming "
+         "as a drowning risk factor. You might feel mildly uncomfortable, but there's no "
+         "documented case of someone drowning due to a post-meal cramp."),
+        ("I was taught that different parts of the tongue taste different flavors — sweet at "
+         "the tip, bitter at the back.",
+         "The tongue map is one of the most widely taught misconceptions in biology. It comes "
+         "from a misinterpretation of a 1901 German thesis by D.P. Hanig. In reality, all "
+         "taste receptor types are distributed across the entire tongue. Any region can detect "
+         "sweet, salty, sour, bitter, and umami. Sensitivity may vary slightly by region, "
+         "but the differences are minimal — not the discrete zones shown in textbooks."),
     ]
     current_tokens = 0
     turn_idx = 0
@@ -387,7 +480,7 @@ class AsyncAPIRunner:
 
             except httpx.HTTPStatusError as e:
                 status = e.response.status_code
-                if status in (401, 403):
+                if status in (401, 402, 403):
                     self.key_pool.mark_dead(key)
                 elif status == 400:
                     # Payload too large or malformed — don't retry, it won't help

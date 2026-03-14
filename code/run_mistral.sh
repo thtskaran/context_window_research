@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-MODEL="mistralai/mistral-7b-instruct"
-MODEL_SLUG="mistralai_mistral-7b-instruct"
+MODEL="mistralai/mistral-small-24b-instruct-2501"
+MODEL_SLUG="mistralai_mistral-small-24b-instruct-2501"
 MAX_TOKENS=32768
 WORKERS=30
 JUDGE_MODEL="anthropic/claude-sonnet-4-6"
@@ -11,7 +11,7 @@ KEYS_FILE="keys.txt"
 REPEATS=3
 
 echo "═══════════════════════════════════════════════════════════"
-echo " Sycophancy × Context — Mistral 7B Instruct v0.3 (32K)"
+echo " Sycophancy × Context — Mistral Small 24B (32K)"
 echo " 115 probes × 11 levels × 3 fillers × ${REPEATS} repeats = 11,385 calls"
 echo " ${WORKERS} concurrent workers"
 echo " Then Sonnet 4.6 judge (${JUDGE_WORKERS} workers)"
