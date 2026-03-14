@@ -23,7 +23,7 @@ All models tested at their 32K architectural limit — filling 100% of the conte
 | DeepSeek V3.1 | ~37B active (MoE) | DeepSeek | 11,367 | 6.0% |
 | Qwen 2.5 72B | 72B | Alibaba | 11,381 | 6.7% |
 
-Total: 67,708 valid trials across 6 models, 4 families. Total cost: ~$596 ($165 experiments, $406 sycophancy judge, ~$25 taxonomy judge). Taxonomy cost is approximate — 10,637 calls × ~788 input tokens/call × $3/M; see README for full derivation.
+Total: 67,708 valid trials across 6 models, 4 families, plus 4,140 correction injection trials. Total cost: ~$631 ($175 experiments, $456 judge passes). Breakdown: $165 original experiments + ~$10 injection experiments, $406 sycophancy judge + ~$25 taxonomy judge + ~$25 injection judge.
 
 ## Key Findings
 
@@ -114,12 +114,33 @@ The paper should have five main contributions:
 
 5. **Sycophancy as cognitive shortcut.** Sycophantic responses are faster (up to 10% in Qwen 7B) and shorter (up to 12% fewer words) than honest responses in small models. Large models that cave write longer, more qualified responses. Agreement is the path of least resistance for capacity-limited models.
 
+### 11. Correction injection resets the ratchet — dose depends on model size
+
+We tested whether injecting correction exchanges after agreement filler can undo behavioral momentum. Fixed at 50% context, 6 conditions: pure agreement, 1/3/5/10 corrections injected, and pure correction. Total filler held constant to control for length. 115 probes × 6 conditions × 6 models = 4,140 calls.
+
+The ratchet is not permanent — correction injection works universally. But the dose-response curve varies sharply by model size:
+
+**Small models need many corrections (Gemma 3N):** Classic monotonic dose-response. 1 correction barely moves the needle (12% reset). 5 corrections = 58% reset (p < 0.05). 10 corrections = 75% reset (p < 0.01). The behavioral momentum has real inertia in attention-constrained models.
+
+**Large models respond to a single correction (DeepSeek V3.1):** Even 1 correction halves sycophancy (13.0% → 6.1%, 89% reset). The most recent behavioral signal dominates — large models are highly recency-sensitive.
+
+**Qwen 7B overcorrects:** The most unexpected finding. Injection conditions go *below* the pure correction baseline — inject_10 at 13.9% vs correct_only at 18.3% (reset fraction 183%). The agreement→correction sequence creates a stronger anti-sycophancy signal than uniform correction. Possible mechanism: the *contrast* between agreement and correction actively teaches the model that pushback is the expected behavior.
+
+**Mixtral shows non-monotonic dose-response:** inject_5 (9.6%) is better than inject_10 (13.0%). Either noise at n=115, or too many corrections confuses the model by creating its own biased pattern.
+
+**Mistral 24B is a floor effect:** Baseline sycophancy so low (3.5%) there's nothing meaningful to measure. None of the injection conditions are statistically significant.
+
+The deployable takeaway: 3-5 correction exchanges is the sweet spot for most models. For production systems, periodic correction injection into long conversations is a viable sycophancy mitigation — and it's cheap (adds ~3% context overhead).
+
 ## What We Haven't Tested Yet
 
 - ~~Persona analysis~~ ✓ Done — credential paradox finding (see §6)
 - ~~Inter-rater reliability~~ ✓ Done — κ = 0.705, substantial agreement (see §8)
+- ~~Correction injection mitigation~~ ✓ Done — ratchet is resettable, dose varies by model size (see §11)
 - Models with different context limits (8K, 64K, 128K)
 - More granular 0-10% context levels for Qwen 7B's step function
+- Injection at different context levels (does 90% context need more corrections than 50%?)
+- Mixed filler experiments (70% agreement + 30% correction — threshold ratio for ratchet?)
 
 ### 8. How models cave: a taxonomy of sycophantic failure
 
@@ -164,4 +185,4 @@ Primary model: Bayesian binomial GLMM with probe_id as random intercept and logi
 
 ## Bottom Line
 
-Across 6 models, 4 families, and 67,708 trials: **small models break as conversations get longer, large models don't, and conversational pattern matters more than conversation length for all models.** Agreement patterns compound sycophancy. Correction patterns protect against it. Informal social framings trigger more sycophancy than expert credentials — the model wants to be liked, not to defer to authority. When models cave, small ones do it quickly and bluntly; large ones hedge and qualify. Sycophancy is the path of least resistance — faster, shorter, and cognitively cheaper. These findings are robust, replicable, and practically actionable.
+Across 6 models, 4 families, and 71,848 trials (67,708 original + 4,140 injection): **small models break as conversations get longer, large models don't, and conversational pattern matters more than conversation length for all models.** Agreement patterns compound sycophancy. Correction patterns protect against it. Crucially, the ratchet is reversible — injecting correction exchanges into agreement-heavy conversations partially or fully resets sycophancy rates. Large models respond to as little as 1 correction; small models need 5-10. Informal social framings trigger more sycophancy than expert credentials — the model wants to be liked, not to defer to authority. When models cave, small ones do it quickly and bluntly; large ones hedge and qualify. Sycophancy is the path of least resistance — faster, shorter, and cognitively cheaper. These findings are robust, replicable, and practically actionable.

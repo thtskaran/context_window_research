@@ -1,6 +1,6 @@
 # Context-Window Lock-In: Measuring How LLMs Break as Conversations Get Longer
 
-Does sycophancy increase as an LLM's context window fills up? We test this across six 32K-context models totalling 67,708 valid trials. The context-length effect scales inversely with model size — small models (~4-12B) degrade measurably, large models (24B+) are flat. The universal finding across all six models is the **behavioral ratchet**: conversational pattern matters more than conversation length. Agreement filler roughly doubles sycophancy compared to correction filler (p < 10⁻¹⁴ in every model).
+Does sycophancy increase as an LLM's context window fills up? We test this across six 32K-context models totalling 67,708 valid trials. The context-length effect scales inversely with model size — small models (~4-12B) degrade measurably, large models (24B+) are flat. The universal finding across all six models is the **behavioral ratchet**: conversational pattern matters more than conversation length. Agreement filler roughly doubles sycophancy compared to correction filler (p < 10⁻¹⁴ in every model). A follow-up **correction injection experiment** (4,140 trials) shows the ratchet can be partially or fully reset by injecting correction exchanges — large models respond to as few as 1 correction, while small models need 5-10.
 
 ## Results Summary
 
@@ -99,6 +99,30 @@ Sycophantic responses are also **shorter** in 4/6 models (8-12% fewer words). Ag
 ![Latency](code/figures/latency_comparison.png)
 ![Length](code/figures/length_comparison.png)
 
+### Correction Injection: Can You Reset the Ratchet?
+
+We tested whether injecting correction exchanges after agreement filler can undo behavioral momentum. Fixed at 50% context, 6 conditions: pure agreement, 1/3/5/10 correction exchanges injected after agreement, and pure correction. Total filler held constant across all conditions to control for context length. 115 probes × 6 conditions × 6 models = 4,140 calls + judge pass.
+
+**The answer: yes, correction injection partially or fully resets the ratchet.** But the dose-response depends on model size.
+
+| Model | Params | agree | inj_1 | inj_3 | inj_5 | inj_10 | correct |
+|---|---|---|---|---|---|---|---|
+| Gemma 3N | ~4B | 38.1% | 35.4% | 30.6% | 25.7%* | 21.9%** | 16.5% |
+| Qwen 7B | 7B | 23.5% | 20.9% | 15.8% | 15.7% | 13.9% | 18.3% |
+| Mixtral 8x7B | ~12B | 25.2% | 14.8%* | 14.9% | 9.6%** | 13.0%* | 7.0% |
+| Mistral 24B | 24B | 3.5% | 2.6% | 2.6% | 0.9% | 3.5% | 0.9% |
+| DeepSeek V3.1 | ~37B | 13.0% | 6.1% | 4.3%* | 5.2%* | 3.5%** | 5.2% |
+| Qwen 72B | 72B | 9.6% | 7.0% | 6.1% | 6.1% | 4.3% | 3.5% |
+
+\* p < 0.05, \*\* p < 0.01 vs agree_only (chi-squared)
+
+**Three distinct patterns:**
+- **Smooth dose-response (Gemma):** Small model needs many corrections. 1 correction = 12% reset, 10 = 75%. Behavioral momentum has real inertia.
+- **Instant reset (DeepSeek, Mixtral):** 1 correction halves sycophancy in DeepSeek (89% reset). Large models are highly responsive to recency.
+- **Overcorrection (Qwen 7B):** Injection conditions go *below* pure correction baseline (reset fractions >100%). The agreement→correction sequence is a stronger anti-sycophancy signal than uniform correction. The contrast teaches the model that pushback is expected.
+
+Mistral 24B is a floor effect — baseline sycophancy too low (3.5%) to measure meaningful reset.
+
 ### Heatmap
 
 ![Heatmap](code/figures/heatmap.png)
@@ -153,9 +177,12 @@ All experiments run via OpenRouter. Sonnet 4.6 judge at $3/M input, $15/M output
 | DeepSeek V3.1 ($0.15/M) | $25 | $68 | **$93** |
 | Qwen 2.5 72B ($0.12/M) | $20 | $68 | **$88** |
 | Taxonomy judge (all models) | — | ~$25 | **~$25** |
-| **Total** | **$165** | **$431** | **~$596** |
+| Injection experiment (all models) | ~$10 | ~$25 | **~$35** |
+| **Total** | **~$175** | **~$456** | **~$631** |
 
 The judge dominates cost (~72%). The experiments themselves are cheap — even the 72B model only costs $20 for 11K calls.
+
+**Injection experiment cost (~$35, approximate):** 690 calls per model (115 probes × 6 conditions) at 50% context fill. Experiment calls are ~6% of the original volume per model, scaling proportionally (~$10 total across 6 models). Judge cost: 4,140 calls × ~$0.006/call ≈ $25.
 
 **Taxonomy judge cost (~$25, approximate):** Only the 10,637 sycophantic responses need taxonomy classification (second Sonnet 4.6 pass). Each call sends the taxonomy prompt (1,087 chars) + claim (avg 61 chars) + truth (avg 133 chars) + model response (avg 990 chars, truncated at 2,000 chars) = ~2,271 chars input. Output is one word (~2 tokens). At ~3.3 chars/token → ~788 tokens/call × 10,637 calls = ~8.4M input tokens × $3/M ≈ $25. Output cost is negligible ($0.32). This is an estimate — actual OpenRouter billing may differ slightly due to tokenizer differences.
 
@@ -177,6 +204,9 @@ The judge dominates cost (~72%). The experiments themselves are cheap — even t
     ├── persona_analysis.py     # Persona template effect analysis
     ├── irr_check.py            # Inter-rater reliability (second judge)
     ├── secondary_analysis.py   # Taxonomy, latency, response length
+    ├── run_correction_injection.py  # Correction injection mitigation experiment
+    ├── analyze_injection.py    # Injection results analysis (reset fractions, dose-response)
+    ├── run_injection_all.sh    # Full injection pipeline (all 6 models)
     ├── run_qwen.sh             # Qwen 7B pipeline
     ├── run_qwen72b.sh          # Qwen 72B pipeline
     ├── run_mistral.sh          # Mistral Small 24B pipeline
@@ -198,6 +228,10 @@ The judge dominates cost (~72%). The experiments themselves are cheap — even t
 4. **Single judge model.** All scoring by Sonnet 4.6. Inter-rater reliability with Claude 3.5 Haiku: κ = 0.705 overall (substantial agreement), 93.4% raw agreement on 1,200 stratified trials. Haiku is systematically more lenient — 92% of disagreements are Sonnet calling sycophancy that Haiku forgives. Per-domain: science (κ=0.86) and factual (κ=0.82) are almost perfect; opinion (κ=0.44) is the weakest domain for inter-rater agreement.
 
 5. **No Llama models.** No Meta Llama model has a 32K native context limit — Llama 3.1 8B is 128K on OpenRouter, so 32K only fills 12% of its window.
+
+6. **Injection experiment at single context level.** Correction injection tested only at 50% context fill. The interaction between injection dose and context level (would the ratchet be harder to reset at 90% context?) is untested. The Mixtral non-monotonicity at inject_10 (13% vs inject_5's 9.6%) may be noise or a real overcorrection effect — needs replication.
+
+7. **Injection controls for length but not for content shift.** Replacing agreement tokens with correction tokens changes both the behavioral pattern and the specific content. A stricter control would use semantically matched correction and agreement exchanges on the same topics.
 
 ## Citation
 

@@ -1,0 +1,1466 @@
+{
+  "deepseek_deepseek-chat-v3.1": {
+    "model": "deepseek_deepseek-chat-v3.1",
+    "n_records": 690,
+    "sycophancy_rates": {
+      "inject_1": {
+        "total": 115,
+        "sycophantic": 7,
+        "honest": 108,
+        "ambiguous": 0,
+        "rate": 0.0609,
+        "rate_pct": "6.1%"
+      },
+      "inject_5": {
+        "total": 115,
+        "sycophantic": 6,
+        "honest": 109,
+        "ambiguous": 0,
+        "rate": 0.0522,
+        "rate_pct": "5.2%"
+      },
+      "inject_3": {
+        "total": 115,
+        "sycophantic": 5,
+        "honest": 110,
+        "ambiguous": 0,
+        "rate": 0.0435,
+        "rate_pct": "4.3%"
+      },
+      "agree_only": {
+        "total": 115,
+        "sycophantic": 15,
+        "honest": 100,
+        "ambiguous": 0,
+        "rate": 0.1304,
+        "rate_pct": "13.0%"
+      },
+      "correct_only": {
+        "total": 115,
+        "sycophantic": 6,
+        "honest": 109,
+        "ambiguous": 0,
+        "rate": 0.0522,
+        "rate_pct": "5.2%"
+      },
+      "inject_10": {
+        "total": 115,
+        "sycophantic": 4,
+        "honest": 111,
+        "ambiguous": 0,
+        "rate": 0.0348,
+        "rate_pct": "3.5%"
+      }
+    },
+    "reset_fractions": {
+      "inject_1": 0.889,
+      "inject_5": 1.0,
+      "inject_3": 1.111,
+      "inject_10": 1.223
+    },
+    "chi_squared_vs_agree": {
+      "inject_1_vs_agree": {
+        "chi2": 3.22,
+        "p_approx": 0.1,
+        "significant_05": false,
+        "significant_01": false
+      },
+      "inject_3_vs_agree": {
+        "chi2": 5.48,
+        "p_approx": 0.05,
+        "significant_05": true,
+        "significant_01": false
+      },
+      "inject_5_vs_agree": {
+        "chi2": 4.24,
+        "p_approx": 0.05,
+        "significant_05": true,
+        "significant_01": false
+      },
+      "inject_10_vs_agree": {
+        "chi2": 6.94,
+        "p_approx": 0.01,
+        "significant_05": true,
+        "significant_01": true
+      }
+    },
+    "domain_breakdown": {
+      "inject_1": {
+        "factual": {
+          "rate": 0.025,
+          "n": 40
+        },
+        "math": {
+          "rate": 0.0,
+          "n": 30
+        },
+        "opinion": {
+          "rate": 0.3333,
+          "n": 15
+        },
+        "logic": {
+          "rate": 0.1,
+          "n": 10
+        },
+        "science": {
+          "rate": 0.0,
+          "n": 15
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        }
+      },
+      "inject_5": {
+        "science": {
+          "rate": 0.0,
+          "n": 15
+        },
+        "opinion": {
+          "rate": 0.1333,
+          "n": 15
+        },
+        "math": {
+          "rate": 0.0,
+          "n": 30
+        },
+        "factual": {
+          "rate": 0.075,
+          "n": 40
+        },
+        "logic": {
+          "rate": 0.1,
+          "n": 10
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        }
+      },
+      "inject_3": {
+        "factual": {
+          "rate": 0.05,
+          "n": 40
+        },
+        "math": {
+          "rate": 0.0,
+          "n": 30
+        },
+        "science": {
+          "rate": 0.0,
+          "n": 15
+        },
+        "logic": {
+          "rate": 0.0,
+          "n": 10
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        },
+        "opinion": {
+          "rate": 0.2,
+          "n": 15
+        }
+      },
+      "agree_only": {
+        "science": {
+          "rate": 0.2,
+          "n": 15
+        },
+        "factual": {
+          "rate": 0.125,
+          "n": 40
+        },
+        "math": {
+          "rate": 0.0333,
+          "n": 30
+        },
+        "opinion": {
+          "rate": 0.3333,
+          "n": 15
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        },
+        "logic": {
+          "rate": 0.1,
+          "n": 10
+        }
+      },
+      "correct_only": {
+        "factual": {
+          "rate": 0.05,
+          "n": 40
+        },
+        "science": {
+          "rate": 0.0,
+          "n": 15
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        },
+        "math": {
+          "rate": 0.0,
+          "n": 30
+        },
+        "logic": {
+          "rate": 0.2,
+          "n": 10
+        },
+        "opinion": {
+          "rate": 0.1333,
+          "n": 15
+        }
+      },
+      "inject_10": {
+        "math": {
+          "rate": 0.0,
+          "n": 30
+        },
+        "science": {
+          "rate": 0.0,
+          "n": 15
+        },
+        "factual": {
+          "rate": 0.05,
+          "n": 40
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        },
+        "opinion": {
+          "rate": 0.1333,
+          "n": 15
+        },
+        "logic": {
+          "rate": 0.0,
+          "n": 10
+        }
+      }
+    }
+  },
+  "google_gemma-3n-e4b-it": {
+    "model": "google_gemma-3n-e4b-it",
+    "n_records": 673,
+    "sycophancy_rates": {
+      "correct_only": {
+        "total": 109,
+        "sycophantic": 18,
+        "honest": 91,
+        "ambiguous": 0,
+        "rate": 0.1651,
+        "rate_pct": "16.5%"
+      },
+      "inject_10": {
+        "total": 114,
+        "sycophantic": 25,
+        "honest": 89,
+        "ambiguous": 0,
+        "rate": 0.2193,
+        "rate_pct": "21.9%"
+      },
+      "inject_1": {
+        "total": 113,
+        "sycophantic": 40,
+        "honest": 73,
+        "ambiguous": 0,
+        "rate": 0.354,
+        "rate_pct": "35.4%"
+      },
+      "inject_5": {
+        "total": 113,
+        "sycophantic": 29,
+        "honest": 84,
+        "ambiguous": 0,
+        "rate": 0.2566,
+        "rate_pct": "25.7%"
+      },
+      "agree_only": {
+        "total": 113,
+        "sycophantic": 43,
+        "honest": 69,
+        "ambiguous": 1,
+        "rate": 0.3805,
+        "rate_pct": "38.1%"
+      },
+      "inject_3": {
+        "total": 111,
+        "sycophantic": 34,
+        "honest": 77,
+        "ambiguous": 0,
+        "rate": 0.3063,
+        "rate_pct": "30.6%"
+      }
+    },
+    "reset_fractions": {
+      "inject_10": 0.748,
+      "inject_1": 0.123,
+      "inject_5": 0.575,
+      "inject_3": 0.344
+    },
+    "chi_squared_vs_agree": {
+      "inject_1_vs_agree": {
+        "chi2": 0.17,
+        "p_approx": 0.5,
+        "significant_05": false,
+        "significant_01": false
+      },
+      "inject_3_vs_agree": {
+        "chi2": 1.37,
+        "p_approx": 0.5,
+        "significant_05": false,
+        "significant_01": false
+      },
+      "inject_5_vs_agree": {
+        "chi2": 3.99,
+        "p_approx": 0.05,
+        "significant_05": true,
+        "significant_01": false
+      },
+      "inject_10_vs_agree": {
+        "chi2": 7.03,
+        "p_approx": 0.01,
+        "significant_05": true,
+        "significant_01": true
+      }
+    },
+    "domain_breakdown": {
+      "correct_only": {
+        "math": {
+          "rate": 0.1034,
+          "n": 29
+        },
+        "factual": {
+          "rate": 0.1143,
+          "n": 35
+        },
+        "science": {
+          "rate": 0.1333,
+          "n": 15
+        },
+        "opinion": {
+          "rate": 0.4667,
+          "n": 15
+        },
+        "logic": {
+          "rate": 0.2,
+          "n": 10
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        }
+      },
+      "inject_10": {
+        "factual": {
+          "rate": 0.125,
+          "n": 40
+        },
+        "science": {
+          "rate": 0.2143,
+          "n": 14
+        },
+        "math": {
+          "rate": 0.2667,
+          "n": 30
+        },
+        "logic": {
+          "rate": 0.3,
+          "n": 10
+        },
+        "opinion": {
+          "rate": 0.3333,
+          "n": 15
+        },
+        "cs": {
+          "rate": 0.2,
+          "n": 5
+        }
+      },
+      "inject_1": {
+        "math": {
+          "rate": 0.4333,
+          "n": 30
+        },
+        "logic": {
+          "rate": 0.6,
+          "n": 10
+        },
+        "factual": {
+          "rate": 0.2105,
+          "n": 38
+        },
+        "opinion": {
+          "rate": 0.6667,
+          "n": 15
+        },
+        "science": {
+          "rate": 0.2,
+          "n": 15
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        }
+      },
+      "inject_5": {
+        "factual": {
+          "rate": 0.15,
+          "n": 40
+        },
+        "opinion": {
+          "rate": 0.5,
+          "n": 14
+        },
+        "logic": {
+          "rate": 0.4,
+          "n": 10
+        },
+        "math": {
+          "rate": 0.3,
+          "n": 30
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        },
+        "science": {
+          "rate": 0.2143,
+          "n": 14
+        }
+      },
+      "agree_only": {
+        "science": {
+          "rate": 0.2667,
+          "n": 15
+        },
+        "factual": {
+          "rate": 0.1842,
+          "n": 38
+        },
+        "math": {
+          "rate": 0.4667,
+          "n": 30
+        },
+        "opinion": {
+          "rate": 0.7333,
+          "n": 15
+        },
+        "cs": {
+          "rate": 0.2,
+          "n": 5
+        },
+        "logic": {
+          "rate": 0.6,
+          "n": 10
+        }
+      },
+      "inject_3": {
+        "math": {
+          "rate": 0.3793,
+          "n": 29
+        },
+        "factual": {
+          "rate": 0.125,
+          "n": 40
+        },
+        "logic": {
+          "rate": 0.6,
+          "n": 10
+        },
+        "science": {
+          "rate": 0.2667,
+          "n": 15
+        },
+        "opinion": {
+          "rate": 0.5,
+          "n": 14
+        },
+        "cs": {
+          "rate": 0.3333,
+          "n": 3
+        }
+      }
+    }
+  },
+  "mistralai_mistral-small-24b-instruct-2501": {
+    "model": "mistralai_mistral-small-24b-instruct-2501",
+    "n_records": 690,
+    "sycophancy_rates": {
+      "inject_3": {
+        "total": 115,
+        "sycophantic": 3,
+        "honest": 112,
+        "ambiguous": 0,
+        "rate": 0.0261,
+        "rate_pct": "2.6%"
+      },
+      "inject_10": {
+        "total": 115,
+        "sycophantic": 4,
+        "honest": 110,
+        "ambiguous": 1,
+        "rate": 0.0348,
+        "rate_pct": "3.5%"
+      },
+      "inject_1": {
+        "total": 115,
+        "sycophantic": 3,
+        "honest": 112,
+        "ambiguous": 0,
+        "rate": 0.0261,
+        "rate_pct": "2.6%"
+      },
+      "agree_only": {
+        "total": 115,
+        "sycophantic": 4,
+        "honest": 111,
+        "ambiguous": 0,
+        "rate": 0.0348,
+        "rate_pct": "3.5%"
+      },
+      "correct_only": {
+        "total": 115,
+        "sycophantic": 1,
+        "honest": 114,
+        "ambiguous": 0,
+        "rate": 0.0087,
+        "rate_pct": "0.9%"
+      },
+      "inject_5": {
+        "total": 115,
+        "sycophantic": 1,
+        "honest": 114,
+        "ambiguous": 0,
+        "rate": 0.0087,
+        "rate_pct": "0.9%"
+      }
+    },
+    "reset_fractions": {
+      "inject_3": 0.333,
+      "inject_10": 0.0,
+      "inject_1": 0.333,
+      "inject_5": 1.0
+    },
+    "chi_squared_vs_agree": {
+      "inject_1_vs_agree": {
+        "chi2": 0.15,
+        "p_approx": 0.5,
+        "significant_05": false,
+        "significant_01": false
+      },
+      "inject_3_vs_agree": {
+        "chi2": 0.15,
+        "p_approx": 0.5,
+        "significant_05": false,
+        "significant_01": false
+      },
+      "inject_5_vs_agree": {
+        "chi2": 1.84,
+        "p_approx": 0.5,
+        "significant_05": false,
+        "significant_01": false
+      },
+      "inject_10_vs_agree": {
+        "chi2": 0.0,
+        "p_approx": 0.5,
+        "significant_05": false,
+        "significant_01": false
+      }
+    },
+    "domain_breakdown": {
+      "inject_3": {
+        "math": {
+          "rate": 0.0333,
+          "n": 30
+        },
+        "factual": {
+          "rate": 0.0,
+          "n": 40
+        },
+        "science": {
+          "rate": 0.0667,
+          "n": 15
+        },
+        "opinion": {
+          "rate": 0.0667,
+          "n": 15
+        },
+        "logic": {
+          "rate": 0.0,
+          "n": 10
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        }
+      },
+      "inject_10": {
+        "factual": {
+          "rate": 0.0,
+          "n": 40
+        },
+        "math": {
+          "rate": 0.0333,
+          "n": 30
+        },
+        "logic": {
+          "rate": 0.0,
+          "n": 10
+        },
+        "opinion": {
+          "rate": 0.1333,
+          "n": 15
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        },
+        "science": {
+          "rate": 0.0667,
+          "n": 15
+        }
+      },
+      "inject_1": {
+        "logic": {
+          "rate": 0.0,
+          "n": 10
+        },
+        "science": {
+          "rate": 0.0,
+          "n": 15
+        },
+        "math": {
+          "rate": 0.0,
+          "n": 30
+        },
+        "factual": {
+          "rate": 0.025,
+          "n": 40
+        },
+        "opinion": {
+          "rate": 0.1333,
+          "n": 15
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        }
+      },
+      "agree_only": {
+        "math": {
+          "rate": 0.0333,
+          "n": 30
+        },
+        "factual": {
+          "rate": 0.05,
+          "n": 40
+        },
+        "science": {
+          "rate": 0.0667,
+          "n": 15
+        },
+        "opinion": {
+          "rate": 0.0,
+          "n": 15
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        },
+        "logic": {
+          "rate": 0.0,
+          "n": 10
+        }
+      },
+      "correct_only": {
+        "math": {
+          "rate": 0.0,
+          "n": 30
+        },
+        "science": {
+          "rate": 0.0,
+          "n": 15
+        },
+        "factual": {
+          "rate": 0.0,
+          "n": 40
+        },
+        "logic": {
+          "rate": 0.0,
+          "n": 10
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        },
+        "opinion": {
+          "rate": 0.0667,
+          "n": 15
+        }
+      },
+      "inject_5": {
+        "science": {
+          "rate": 0.0,
+          "n": 15
+        },
+        "factual": {
+          "rate": 0.0,
+          "n": 40
+        },
+        "math": {
+          "rate": 0.0,
+          "n": 30
+        },
+        "opinion": {
+          "rate": 0.0667,
+          "n": 15
+        },
+        "logic": {
+          "rate": 0.0,
+          "n": 10
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        }
+      }
+    }
+  },
+  "mistralai_mixtral-8x7b-instruct": {
+    "model": "mistralai_mixtral-8x7b-instruct",
+    "n_records": 689,
+    "sycophancy_rates": {
+      "inject_10": {
+        "total": 115,
+        "sycophantic": 15,
+        "honest": 100,
+        "ambiguous": 0,
+        "rate": 0.1304,
+        "rate_pct": "13.0%"
+      },
+      "inject_5": {
+        "total": 115,
+        "sycophantic": 11,
+        "honest": 104,
+        "ambiguous": 0,
+        "rate": 0.0957,
+        "rate_pct": "9.6%"
+      },
+      "inject_1": {
+        "total": 115,
+        "sycophantic": 17,
+        "honest": 98,
+        "ambiguous": 0,
+        "rate": 0.1478,
+        "rate_pct": "14.8%"
+      },
+      "agree_only": {
+        "total": 115,
+        "sycophantic": 29,
+        "honest": 86,
+        "ambiguous": 0,
+        "rate": 0.2522,
+        "rate_pct": "25.2%"
+      },
+      "correct_only": {
+        "total": 115,
+        "sycophantic": 8,
+        "honest": 107,
+        "ambiguous": 0,
+        "rate": 0.0696,
+        "rate_pct": "7.0%"
+      },
+      "inject_3": {
+        "total": 114,
+        "sycophantic": 17,
+        "honest": 96,
+        "ambiguous": 1,
+        "rate": 0.1491,
+        "rate_pct": "14.9%"
+      }
+    },
+    "reset_fractions": {
+      "inject_10": 0.667,
+      "inject_5": 0.857,
+      "inject_1": 0.572,
+      "inject_3": 0.565
+    },
+    "chi_squared_vs_agree": {
+      "inject_1_vs_agree": {
+        "chi2": 3.91,
+        "p_approx": 0.05,
+        "significant_05": true,
+        "significant_01": false
+      },
+      "inject_3_vs_agree": {
+        "chi2": 3.79,
+        "p_approx": 0.1,
+        "significant_05": false,
+        "significant_01": false
+      },
+      "inject_5_vs_agree": {
+        "chi2": 9.81,
+        "p_approx": 0.01,
+        "significant_05": true,
+        "significant_01": true
+      },
+      "inject_10_vs_agree": {
+        "chi2": 5.51,
+        "p_approx": 0.05,
+        "significant_05": true,
+        "significant_01": false
+      }
+    },
+    "domain_breakdown": {
+      "inject_10": {
+        "math": {
+          "rate": 0.2333,
+          "n": 30
+        },
+        "science": {
+          "rate": 0.0667,
+          "n": 15
+        },
+        "logic": {
+          "rate": 0.1,
+          "n": 10
+        },
+        "opinion": {
+          "rate": 0.0,
+          "n": 15
+        },
+        "factual": {
+          "rate": 0.1,
+          "n": 40
+        },
+        "cs": {
+          "rate": 0.4,
+          "n": 5
+        }
+      },
+      "inject_5": {
+        "logic": {
+          "rate": 0.3,
+          "n": 10
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        },
+        "science": {
+          "rate": 0.0667,
+          "n": 15
+        },
+        "opinion": {
+          "rate": 0.0,
+          "n": 15
+        },
+        "math": {
+          "rate": 0.1667,
+          "n": 30
+        },
+        "factual": {
+          "rate": 0.05,
+          "n": 40
+        }
+      },
+      "inject_1": {
+        "factual": {
+          "rate": 0.075,
+          "n": 40
+        },
+        "math": {
+          "rate": 0.3333,
+          "n": 30
+        },
+        "opinion": {
+          "rate": 0.0,
+          "n": 15
+        },
+        "logic": {
+          "rate": 0.4,
+          "n": 10
+        },
+        "science": {
+          "rate": 0.0,
+          "n": 15
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        }
+      },
+      "agree_only": {
+        "math": {
+          "rate": 0.3667,
+          "n": 30
+        },
+        "science": {
+          "rate": 0.1333,
+          "n": 15
+        },
+        "factual": {
+          "rate": 0.225,
+          "n": 40
+        },
+        "logic": {
+          "rate": 0.5,
+          "n": 10
+        },
+        "cs": {
+          "rate": 0.4,
+          "n": 5
+        },
+        "opinion": {
+          "rate": 0.0,
+          "n": 15
+        }
+      },
+      "correct_only": {
+        "math": {
+          "rate": 0.1667,
+          "n": 30
+        },
+        "factual": {
+          "rate": 0.0,
+          "n": 40
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        },
+        "opinion": {
+          "rate": 0.0,
+          "n": 15
+        },
+        "logic": {
+          "rate": 0.2,
+          "n": 10
+        },
+        "science": {
+          "rate": 0.0667,
+          "n": 15
+        }
+      },
+      "inject_3": {
+        "science": {
+          "rate": 0.1333,
+          "n": 15
+        },
+        "factual": {
+          "rate": 0.0513,
+          "n": 39
+        },
+        "cs": {
+          "rate": 0.2,
+          "n": 5
+        },
+        "math": {
+          "rate": 0.3333,
+          "n": 30
+        },
+        "opinion": {
+          "rate": 0.0,
+          "n": 15
+        },
+        "logic": {
+          "rate": 0.2,
+          "n": 10
+        }
+      }
+    }
+  },
+  "qwen_qwen-2.5-72b-instruct": {
+    "model": "qwen_qwen-2.5-72b-instruct",
+    "n_records": 690,
+    "sycophancy_rates": {
+      "inject_10": {
+        "total": 115,
+        "sycophantic": 5,
+        "honest": 110,
+        "ambiguous": 0,
+        "rate": 0.0435,
+        "rate_pct": "4.3%"
+      },
+      "inject_1": {
+        "total": 115,
+        "sycophantic": 8,
+        "honest": 107,
+        "ambiguous": 0,
+        "rate": 0.0696,
+        "rate_pct": "7.0%"
+      },
+      "inject_5": {
+        "total": 115,
+        "sycophantic": 7,
+        "honest": 108,
+        "ambiguous": 0,
+        "rate": 0.0609,
+        "rate_pct": "6.1%"
+      },
+      "inject_3": {
+        "total": 115,
+        "sycophantic": 7,
+        "honest": 108,
+        "ambiguous": 0,
+        "rate": 0.0609,
+        "rate_pct": "6.1%"
+      },
+      "correct_only": {
+        "total": 115,
+        "sycophantic": 4,
+        "honest": 111,
+        "ambiguous": 0,
+        "rate": 0.0348,
+        "rate_pct": "3.5%"
+      },
+      "agree_only": {
+        "total": 115,
+        "sycophantic": 11,
+        "honest": 104,
+        "ambiguous": 0,
+        "rate": 0.0957,
+        "rate_pct": "9.6%"
+      }
+    },
+    "reset_fractions": {
+      "inject_10": 0.857,
+      "inject_1": 0.429,
+      "inject_5": 0.571,
+      "inject_3": 0.571
+    },
+    "chi_squared_vs_agree": {
+      "inject_1_vs_agree": {
+        "chi2": 0.52,
+        "p_approx": 0.5,
+        "significant_05": false,
+        "significant_01": false
+      },
+      "inject_3_vs_agree": {
+        "chi2": 0.96,
+        "p_approx": 0.5,
+        "significant_05": false,
+        "significant_01": false
+      },
+      "inject_5_vs_agree": {
+        "chi2": 0.96,
+        "p_approx": 0.5,
+        "significant_05": false,
+        "significant_01": false
+      },
+      "inject_10_vs_agree": {
+        "chi2": 2.42,
+        "p_approx": 0.5,
+        "significant_05": false,
+        "significant_01": false
+      }
+    },
+    "domain_breakdown": {
+      "inject_10": {
+        "factual": {
+          "rate": 0.0,
+          "n": 40
+        },
+        "opinion": {
+          "rate": 0.2667,
+          "n": 15
+        },
+        "math": {
+          "rate": 0.0,
+          "n": 30
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        },
+        "logic": {
+          "rate": 0.0,
+          "n": 10
+        },
+        "science": {
+          "rate": 0.0667,
+          "n": 15
+        }
+      },
+      "inject_1": {
+        "factual": {
+          "rate": 0.025,
+          "n": 40
+        },
+        "math": {
+          "rate": 0.0,
+          "n": 30
+        },
+        "opinion": {
+          "rate": 0.3333,
+          "n": 15
+        },
+        "logic": {
+          "rate": 0.1,
+          "n": 10
+        },
+        "science": {
+          "rate": 0.0667,
+          "n": 15
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        }
+      },
+      "inject_5": {
+        "factual": {
+          "rate": 0.025,
+          "n": 40
+        },
+        "science": {
+          "rate": 0.0667,
+          "n": 15
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        },
+        "math": {
+          "rate": 0.0,
+          "n": 30
+        },
+        "opinion": {
+          "rate": 0.3333,
+          "n": 15
+        },
+        "logic": {
+          "rate": 0.0,
+          "n": 10
+        }
+      },
+      "inject_3": {
+        "science": {
+          "rate": 0.0667,
+          "n": 15
+        },
+        "opinion": {
+          "rate": 0.2667,
+          "n": 15
+        },
+        "factual": {
+          "rate": 0.025,
+          "n": 40
+        },
+        "math": {
+          "rate": 0.0,
+          "n": 30
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        },
+        "logic": {
+          "rate": 0.1,
+          "n": 10
+        }
+      },
+      "correct_only": {
+        "factual": {
+          "rate": 0.025,
+          "n": 40
+        },
+        "math": {
+          "rate": 0.0,
+          "n": 30
+        },
+        "logic": {
+          "rate": 0.0,
+          "n": 10
+        },
+        "science": {
+          "rate": 0.0667,
+          "n": 15
+        },
+        "opinion": {
+          "rate": 0.1333,
+          "n": 15
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        }
+      },
+      "agree_only": {
+        "factual": {
+          "rate": 0.025,
+          "n": 40
+        },
+        "math": {
+          "rate": 0.0,
+          "n": 30
+        },
+        "science": {
+          "rate": 0.0667,
+          "n": 15
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        },
+        "logic": {
+          "rate": 0.1,
+          "n": 10
+        },
+        "opinion": {
+          "rate": 0.5333,
+          "n": 15
+        }
+      }
+    }
+  },
+  "qwen_qwen-2.5-7b-instruct": {
+    "model": "qwen_qwen-2.5-7b-instruct",
+    "n_records": 689,
+    "sycophancy_rates": {
+      "agree_only": {
+        "total": 115,
+        "sycophantic": 27,
+        "honest": 88,
+        "ambiguous": 0,
+        "rate": 0.2348,
+        "rate_pct": "23.5%"
+      },
+      "inject_5": {
+        "total": 115,
+        "sycophantic": 18,
+        "honest": 97,
+        "ambiguous": 0,
+        "rate": 0.1565,
+        "rate_pct": "15.7%"
+      },
+      "inject_3": {
+        "total": 114,
+        "sycophantic": 18,
+        "honest": 96,
+        "ambiguous": 0,
+        "rate": 0.1579,
+        "rate_pct": "15.8%"
+      },
+      "correct_only": {
+        "total": 115,
+        "sycophantic": 21,
+        "honest": 94,
+        "ambiguous": 0,
+        "rate": 0.1826,
+        "rate_pct": "18.3%"
+      },
+      "inject_1": {
+        "total": 115,
+        "sycophantic": 24,
+        "honest": 91,
+        "ambiguous": 0,
+        "rate": 0.2087,
+        "rate_pct": "20.9%"
+      },
+      "inject_10": {
+        "total": 115,
+        "sycophantic": 16,
+        "honest": 99,
+        "ambiguous": 0,
+        "rate": 0.1391,
+        "rate_pct": "13.9%"
+      }
+    },
+    "reset_fractions": {
+      "inject_5": 1.5,
+      "inject_3": 1.473,
+      "inject_1": 0.5,
+      "inject_10": 1.833
+    },
+    "chi_squared_vs_agree": {
+      "inject_1_vs_agree": {
+        "chi2": 0.23,
+        "p_approx": 0.5,
+        "significant_05": false,
+        "significant_01": false
+      },
+      "inject_3_vs_agree": {
+        "chi2": 2.14,
+        "p_approx": 0.5,
+        "significant_05": false,
+        "significant_01": false
+      },
+      "inject_5_vs_agree": {
+        "chi2": 2.24,
+        "p_approx": 0.5,
+        "significant_05": false,
+        "significant_01": false
+      },
+      "inject_10_vs_agree": {
+        "chi2": 3.46,
+        "p_approx": 0.1,
+        "significant_05": false,
+        "significant_01": false
+      }
+    },
+    "domain_breakdown": {
+      "agree_only": {
+        "science": {
+          "rate": 0.1333,
+          "n": 15
+        },
+        "math": {
+          "rate": 0.1333,
+          "n": 30
+        },
+        "factual": {
+          "rate": 0.225,
+          "n": 40
+        },
+        "opinion": {
+          "rate": 0.4,
+          "n": 15
+        },
+        "logic": {
+          "rate": 0.5,
+          "n": 10
+        },
+        "cs": {
+          "rate": 0.2,
+          "n": 5
+        }
+      },
+      "inject_5": {
+        "factual": {
+          "rate": 0.25,
+          "n": 40
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        },
+        "math": {
+          "rate": 0.0333,
+          "n": 30
+        },
+        "science": {
+          "rate": 0.0667,
+          "n": 15
+        },
+        "opinion": {
+          "rate": 0.2,
+          "n": 15
+        },
+        "logic": {
+          "rate": 0.3,
+          "n": 10
+        }
+      },
+      "inject_3": {
+        "factual": {
+          "rate": 0.1795,
+          "n": 39
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        },
+        "math": {
+          "rate": 0.1,
+          "n": 30
+        },
+        "opinion": {
+          "rate": 0.3333,
+          "n": 15
+        },
+        "logic": {
+          "rate": 0.2,
+          "n": 10
+        },
+        "science": {
+          "rate": 0.0667,
+          "n": 15
+        }
+      },
+      "correct_only": {
+        "factual": {
+          "rate": 0.275,
+          "n": 40
+        },
+        "science": {
+          "rate": 0.2,
+          "n": 15
+        },
+        "math": {
+          "rate": 0.0667,
+          "n": 30
+        },
+        "opinion": {
+          "rate": 0.2,
+          "n": 15
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        },
+        "logic": {
+          "rate": 0.2,
+          "n": 10
+        }
+      },
+      "inject_1": {
+        "math": {
+          "rate": 0.1,
+          "n": 30
+        },
+        "factual": {
+          "rate": 0.25,
+          "n": 40
+        },
+        "science": {
+          "rate": 0.0667,
+          "n": 15
+        },
+        "cs": {
+          "rate": 0.2,
+          "n": 5
+        },
+        "opinion": {
+          "rate": 0.4,
+          "n": 15
+        },
+        "logic": {
+          "rate": 0.3,
+          "n": 10
+        }
+      },
+      "inject_10": {
+        "logic": {
+          "rate": 0.1,
+          "n": 10
+        },
+        "math": {
+          "rate": 0.0667,
+          "n": 30
+        },
+        "factual": {
+          "rate": 0.125,
+          "n": 40
+        },
+        "opinion": {
+          "rate": 0.3333,
+          "n": 15
+        },
+        "cs": {
+          "rate": 0.0,
+          "n": 5
+        },
+        "science": {
+          "rate": 0.2,
+          "n": 15
+        }
+      }
+    }
+  }
+}

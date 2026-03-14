@@ -115,7 +115,7 @@ Via OpenRouter API: `qwen/qwen-2.5-7b-instruct`
 
 ### 3.3 Cost
 
-Total across all 6 models: **~$596** ($165 experiments + $406 sycophancy judge + ~$25 taxonomy judge). Per-model average: ~$95 for experiment + sycophancy judging. The sycophancy judge dominates cost (~68%). Taxonomy judge cost is approximate: 10,637 sycophantic responses × ~788 input tokens/call × $3/M input = ~$25 (see README for full derivation).
+Total across all 6 models including injection experiment: **~$631** ($175 experiments + $456 judge passes). Original experiment: $165 experiments + $406 sycophancy judge + ~$25 taxonomy judge = ~$596. Correction injection follow-up: ~$10 experiments + ~$25 judge = ~$35. Per-model average: ~$95 for original experiment + sycophancy judging. The sycophancy judge dominates cost (~72%). See README for full cost derivation.
 
 ---
 
@@ -219,6 +219,34 @@ Models with fewer than 100 results automatically excluded.
 
 ---
 
+## 5.6 Correction Injection Experiment (Follow-Up)
+
+A targeted follow-up testing whether the behavioral ratchet can be reversed by injecting correction exchanges into agreement-heavy context.
+
+**Design:** Fixed at 50% context fill. 6 conditions, all holding total filler length constant:
+
+| Condition | Agreement Filler | Correction Exchanges | Purpose |
+|---|---|---|---|
+| agree_only | 50% | 0 | Baseline high-sycophancy (existing data) |
+| inject_1 | ~49% | 1 | Minimal intervention |
+| inject_3 | ~47% | 3 | Light dose |
+| inject_5 | ~45% | 5 | Moderate dose |
+| inject_10 | ~40% | 10 | Heavy dose |
+| correct_only | 0% | 50% | Baseline low-sycophancy (existing data) |
+
+Correction exchanges are placed at the *end* of the agreement block (recency matters). Total filler tokens held constant across conditions by reducing agreement tokens to make room for correction tokens.
+
+**Scale:** 115 probes × 6 conditions × 6 models = 4,140 experiment calls + 4,140 judge calls.
+
+**Primary metrics:**
+- Sycophancy rate per condition vs agree_only (chi-squared)
+- Reset fraction: (agree_rate − inject_rate) / (agree_rate − correct_rate). 1.0 = full reset, 0.0 = no effect, >1.0 = overcorrection
+- Dose-response shape per model (monotonic vs plateau vs non-monotonic)
+
+**Implementation:** `run_correction_injection.py` (imports shared components from `run_experiment.py`), `analyze_injection.py` (reset fractions, chi-squared, domain breakdown), `run_injection_all.sh` (full pipeline).
+
+---
+
 ## 6. Codebase Structure
 
 ```
@@ -227,12 +255,15 @@ code/
 ├── run_experiment.py           # Async experiment runner (30 workers, persona rotation)
 ├── llm_judge.py                # Async domain-aware judge (35 workers, dual rubrics)
 ├── taxonomy_judge.py           # Async failure mode classifier (direct/elaborate/qualified)
+├── run_correction_injection.py # Correction injection mitigation experiment
+├── analyze_injection.py        # Injection results analysis (reset fractions, dose-response)
+├── run_injection_all.sh        # Full injection pipeline (all 6 models)
 ├── phase_diagram.py            # Phase diagram + filler/domain comparison figures
 ├── statistical_tests.py        # Full statistical battery (GLMM, Spearman, Mann-Whitney, etc.)
 ├── run_qwen.sh                 # One-shot Qwen pipeline
 ├── run_mistral.sh              # One-shot Mistral Small 24B pipeline
 ├── results/                    # Raw + judged JSONL results (gitignored)
-└── figures/                    # Generated figures + stats report
+└── figures/                    # Generated figures + stats report + injection_report.json
 ```
 
 ---
