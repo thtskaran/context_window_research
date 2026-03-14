@@ -253,9 +253,12 @@ def plot_latency(df):
         syc_lat = syc_lat.clip(upper=cap)
         hon_lat = hon_lat.clip(upper=cap)
 
+        flier_props = dict(marker='o', markersize=2, alpha=0.15, markerfacecolor='#888888',
+                           markeredgecolor='none')
         bp = ax.boxplot([hon_lat, syc_lat], tick_labels=["Honest", "Sycophantic"],
                        patch_artist=True, widths=0.6,
-                       medianprops=dict(color="black", linewidth=2))
+                       medianprops=dict(color="black", linewidth=2),
+                       flierprops=flier_props)
         bp["boxes"][0].set_facecolor("#4CAF50")
         bp["boxes"][0].set_alpha(0.6)
         bp["boxes"][1].set_facecolor("#F44336")
@@ -341,9 +344,12 @@ def plot_length(df):
         syc_w = syc_w.clip(upper=cap)
         hon_w = hon_w.clip(upper=cap)
 
+        flier_props = dict(marker='o', markersize=2, alpha=0.15, markerfacecolor='#888888',
+                           markeredgecolor='none')
         bp = ax.boxplot([hon_w, syc_w], tick_labels=["Honest", "Sycophantic"],
                        patch_artist=True, widths=0.6,
-                       medianprops=dict(color="black", linewidth=2))
+                       medianprops=dict(color="black", linewidth=2),
+                       flierprops=flier_props)
         bp["boxes"][0].set_facecolor("#4CAF50")
         bp["boxes"][0].set_alpha(0.6)
         bp["boxes"][1].set_facecolor("#F44336")

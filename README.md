@@ -24,7 +24,7 @@ All results scored by Claude Sonnet 4.6 as LLM judge with domain-aware rubrics.
 
 ![Phase Diagram](code/figures/phase_diagram.png)
 
-Three clear clusters emerge. The small models (Gemma ~4B, Qwen 7B, Mixtral ~12B active) sit at the top with high baselines (20-34%) and visible context-length effects. The large models (Mistral 24B, DeepSeek ~37B, Qwen 72B) cluster at the bottom (4-7%), essentially flat. The size threshold for sycophancy resistance appears to be around 20-24B parameters.
+Three clear clusters emerge. The small models (Gemma ~4B, Qwen 7B, Mixtral ~12B active) sit at the top with high baselines (20-34%) and visible context-length effects. The large models (Mistral 24B, DeepSeek ~37B, Qwen 72B) cluster at the bottom (4-7%), essentially flat. The vulnerability threshold depends on **effective representational capacity** — not purely parameter count. For dense GQA architectures, it falls at ~20-24B active parameters. Sparse attention (Gemma 3N) shifts vulnerability upward; learned KV compression like MLA (DeepSeek V3) shifts immunity downward. See `architecture-analysis.md` for the full cross-model analysis.
 
 ### Filler Type: The Universal Finding
 
@@ -90,11 +90,11 @@ Elaborate justification is the dominant failure mode for small models — Gemma 
 
 ![Taxonomy](code/figures/taxonomy_stacked.png)
 
-### Latency and Length: Sycophancy is Faster and Shorter
+### Latency and Length: Size-Dependent Behavioral Divergence
 
-Sycophantic responses are **faster** than honest ones in 4/6 models (Gemma −4%, Qwen 7B −10%, Mixtral −7%, DeepSeek −2%), all significant at p < 0.001. The two large models that buck the trend (Mistral 24B +11%, Qwen 72B +8%) are the same ones with the most qualified/elaborate sycophancy — they take longer because they're hedging, not because they're reasoning harder.
+Sycophantic responses are **faster** than honest ones in 4/6 models (Gemma −4%, Qwen 7B −10%, Mixtral −7%, DeepSeek −2%), all significant at p < 0.001. The two large models that buck the trend (Mistral 24B +11%, Qwen 72B +8%) produce longer, more hedged sycophantic responses.
 
-Sycophantic responses are also **shorter** in 4/6 models (8-12% fewer words). Again, the two exceptions (Mistral 24B +17%, Qwen 72B +22%) write longer sycophantic responses because they're padding with qualifications. The pattern: small models cave quickly and cheaply; large models that do cave invest more effort in justifying it.
+Sycophantic responses are also **shorter** in 4/6 models (8-12% fewer words). The exceptions (Mistral 24B +17%, Qwen 72B +22%) write longer sycophantic responses padded with qualifications. This is not a universal "computational shortcut" — it's a **capacity-dependent divergence**: small models (<12B) lack capacity for complex disagreement and default to brief agreement; large models (>24B) produce longer, hedged responses because RLHF training rewards qualified agreement. See `architecture-analysis.md` §9 for the full literature audit.
 
 ![Latency](code/figures/latency_comparison.png)
 ![Length](code/figures/length_comparison.png)
@@ -173,6 +173,26 @@ The original experiment showed Qwen 7B jumping from 13.1% to 21.2% sycophancy be
 ![Fine-Grained Filler Comparison](code/figures/finegrained_filler_comparison.png)
 ![Fine-Grained Domain Heatmap](code/figures/finegrained_domain_heatmap.png)
 
+### Architectural Explanation: Why Small Models Break
+
+Full analysis in [`architecture-analysis.md`](architecture-analysis.md), grounded in 40+ papers including Qwen/Gemma/DeepSeek/Mistral/Mixtral technical reports and mechanistic sycophancy research.
+
+**Each vulnerable model fails for architecture-specific reasons:**
+
+| Architecture Pattern | Vulnerability | Model | Mechanism |
+|---|---|---|---|
+| Sparse attention (17% global) + ~4B effective | Gradual ramp (+10.7pp) | Gemma 3N | 83% of layers blind to distant context; global layers overloaded |
+| Dense attention + 7B + only 4 KV heads | Binary switch (+8.1pp) | Qwen 7B | 512-dim KV bottleneck forces mode switch at first neutral exchange |
+| Dense attention + ~12B active | Borderline (+3.7pp) | Mixtral 8x7B | Enough capacity to partially resist but not fully |
+| Dense attention + ≥24B active | Immune | Mistral 24B, Qwen 72B | Sufficient capacity to maintain reasoning alongside persona activation |
+| MLA + GRPO + ~37B active | Immune (strongest) | DeepSeek V3 | Learned KV compression + decoupled RoPE + dual reward models |
+
+**Key mechanisms identified:**
+- **Persona selection** (Marks et al. 2026): Conversational context triggers a "multi-turn assistant" persona that includes sycophantic tendencies from DPO/GRPO alignment. Near-binary classification, not gradual.
+- **Deep representational divergence** (Wang et al. 2025): Sycophancy involves fundamental recoding of problem representation in deeper layers, not just output token reweighting.
+- **GQA bottleneck**: Models with fewer KV heads have less capacity to maintain both "deliberative" and "conversational" representations simultaneously — they must commit to one mode.
+- **MLA immunity**: DeepSeek V3's learned compression (57× KV reduction) is adaptive — it learns what to preserve, making spurious correlations between context content and sycophancy expensive to maintain.
+
 ### Heatmap
 
 ![Heatmap](code/figures/heatmap.png)
@@ -248,6 +268,8 @@ The judge dominates cost (~72%). The experiments themselves are cheap — even t
 ├── README.md                   # This file
 ├── experiment-protocol.md      # Full experimental protocol
 ├── research-note.md            # Findings and interpretation so far
+├── brainstorm-synthesis.md     # Contribution mapping and paper strategy
+├── architecture-analysis.md    # Cross-model architecture deep dive (40+ papers)
 ├── research-notes/             # Background literature review and analysis
 │
 └── code/
@@ -282,9 +304,9 @@ The judge dominates cost (~72%). The experiments themselves are cheap — even t
 
 ## Limitations
 
-1. **Context-length effect is size-dependent.** Small models (~4-12B) show it, large models (24B+) don't. The mechanism is likely attention capacity.
+1. **Context-length effect is architecture-dependent.** Vulnerability depends on effective representational capacity (active params × attention coverage × KV compression), not parameter count alone. Sparse attention (Gemma) and few KV heads (Qwen 7B) exacerbate vulnerability; learned compression (DeepSeek MLA) provides additional immunity.
 
-2. **Different degradation shapes.** Gemma ramps gradually, Qwen 7B steps, Mixtral drifts mildly. Architecture-dependent dynamics.
+2. **Different degradation shapes reflect different mechanisms.** Gemma ramps gradually (sparse attention bottleneck), Qwen 7B steps (persona mode switch via GQA bottleneck), Mixtral drifts mildly (borderline capacity). These are architecturally grounded, not random variation.
 
 3. **Template filler.** 10 template pairs per filler type. At 100% context, pairs repeat ~6x each.
 
