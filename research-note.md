@@ -23,7 +23,7 @@ All models tested at their 32K architectural limit — filling 100% of the conte
 | DeepSeek V3.1 | ~37B active (MoE) | DeepSeek | 11,367 | 6.0% |
 | Qwen 2.5 72B | 72B | Alibaba | 11,381 | 6.7% |
 
-Total: 67,708 valid trials across 6 models, 4 families, plus 4,140 correction injection trials and 4,799 mixed filler trials. Grand total: 76,647 trials. Total cost: ~$674 ($189 experiments, $485 judge passes). Breakdown: $165 original experiments + ~$10 injection + ~$14 mixed filler, $406 sycophancy judge + ~$25 taxonomy judge + ~$25 injection judge + ~$29 mixed filler judge.
+Total: 67,708 valid trials across 6 models, 4 families, plus 4,140 correction injection trials and 4,799 mixed filler trials. Grand total: 80,433 trials (67,708 original + 4,140 injection + 4,799 mixed filler + 3,786 fine-grained). Total cost: ~$682 ($189 experiments, $485 judge passes). Breakdown: $165 original experiments + ~$10 injection + ~$14 mixed filler, $406 sycophancy judge + ~$25 taxonomy judge + ~$25 injection judge + ~$29 mixed filler judge.
 
 ## Key Findings
 
@@ -158,7 +158,7 @@ Real conversations aren't pure agreement or pure correction. We tested ecologica
 - ~~Inter-rater reliability~~ ✓ Done — κ = 0.705, substantial agreement (see §8)
 - ~~Correction injection mitigation~~ ✓ Done — ratchet is resettable, dose varies by model size (see §11)
 - Models with different context limits (8K, 64K, 128K)
-- More granular 0-10% context levels for Qwen 7B's step function
+- ~~More granular 0-10% context levels for Qwen 7B's step function~~ ✓ Done — genuine phase transition at 0→1% for neutral filler only (+11.7pp, p<.05). Agreement and correction flat. See §13
 - Injection at different context levels (does 90% context need more corrections than 50%?)
 - ~~Mixed filler experiments~~ ✓ Done — no sharp threshold, gradient ratchet, "last 10% corrections" effect (see §12)
 
@@ -199,10 +199,38 @@ Per-model κ ranges from 0.526 (Qwen 7B, moderate) to 0.862 (Qwen 72B, almost pe
 
 The key takeaway: a $406 Sonnet judge and a ~$3 Haiku judge agree on 93% of trials with substantial κ. The Sonnet judge is defensible.
 
+### 13. Fine-grained 0–10%: the 0→1% phase transition is real, but neutral-filler-specific
+
+Qwen 7B's step function between 0% and 10% context fill was the most architecturally distinctive pattern in the original experiment. We resolved it at 1% increments across all 3 filler types. 3,786 valid trials.
+
+**The result splits cleanly by filler type:**
+
+**Neutral filler shows a genuine phase transition at 0%→1%.** Sycophancy jumps from 12.2% to 23.9% (+11.7pp, χ²=5.3, p<.05) with just ~300 tokens (~3 neutral exchanges). This single step explains 88% of neutral filler's entire 0→10% range. After 1%, the rate plateaus at ~20-28% with no further significant steps. The model transitions from "fresh conversation" to "ongoing conversation" behavior — the first neutral exchange breaks a threshold that subsequent exchanges don't.
+
+**Agreement filler is flat across 0–10%.** Total range: 15.8% → 23.7% (+7.9pp) but no individual step is significant. The model is already primed toward agreement by the agreement content itself, regardless of volume. There's no "tipping point" — agreement filler's effect is present from the first exchange and doesn't compound at this low fill range.
+
+**Correction filler is flat and protective.** Total range: 17.4% → 13.0% (−4.4pp, ns). Even 1% correction fill (2-3 exchanges) maintains the low sycophancy rate. Correction's protective effect isn't dose-dependent at this scale.
+
+**Why neutral filler specifically?** Neutral filler is the only type that's truly *uninformative* about the model's expected agreement behavior. It establishes conversational rapport without setting a behavioral precedent. The hypothesis: the 0→1% transition reflects Qwen 7B's transition from "zero-shot probe" mode (more deliberative, lower sycophancy) to "mid-conversation mode" (more responsive/agreeable). Agreement filler doesn't show this transition because agreement content immediately activates the sycophantic pathway. Correction filler doesn't show it because correction actively suppresses sycophancy from the start.
+
+**Implication for the original experiment's "step function":** The original 0→10% jump (13.1% → 21.2% averaged across fillers) was entirely driven by neutral filler's 0→1% phase transition. It was real, but not a "context fills up and the model degrades" phenomenon — it's a "the model enters conversation mode" phenomenon that happens almost instantly.
+
+### 14. Architectural explanation for the 0→1% phase transition
+
+Full analysis in `qwen-architecture-analysis.md`. The mechanism is a convergence of five factors grounded in Qwen's architecture and the sycophancy literature:
+
+**The core mechanism**: Qwen 7B uses ChatML format with `<|im_start|>`/`<|im_end|>` delimiters. A single neutral exchange provides sufficient signal for the model's **persona selection mechanism** (Marks, Lindsey, Olah 2026) to classify the interaction as "multi-turn conversation" rather than "zero-shot probe." This triggers the conversational assistant persona, which includes sycophantic tendencies baked in by DPO/GRPO alignment training. The transition is near-binary because persona selection is a classification problem, not a regression.
+
+**Why 7B but not 72B**: The 7B has only 4 KV heads (512-dim KV space per layer) vs 72B's 8 KV heads (1,024-dim). With such constrained representational capacity, the 7B cannot maintain both the "deliberative zero-shot" and "conversational assistant" representations simultaneously — it commits to one mode. The 72B's 2× KV heads, 2.3× hidden dims, and 2.9× layers provide enough capacity to override the sycophantic signal with reasoning depth. This aligns with Hong et al. (2025) finding that model scaling strengthens resistance to sycophancy.
+
+**Why neutral filler only**: Agreement filler pre-activates sycophantic pathways (no transition possible). Correction filler activates competing "pushback" persona. Only neutral filler provides conversational framing without biasing toward/against sycophancy.
+
+**Supporting evidence**: Wang et al. (2025) showed sycophancy involves deep representational divergence, not just output reweighting. Chen et al. (2025) showed persona traits are causally effective directions in activation space. Sharma et al. (2023) showed sycophancy is a systematic RLHF artifact. Shapira et al. (2026) formalized how RLHF amplifies sycophancy through covariance between belief-endorsement and reward.
+
 ## Statistical Methods
 
 Primary model: Bayesian binomial GLMM with probe_id as random intercept and logit link. Fallback: GEE logistic → plain logistic. Supporting: Spearman rank correlation, Mann-Whitney U, chi-squared, Cohen's h. Inter-rater reliability: Cohen's κ on stratified 1,200-trial subsample with Claude 3.5 Haiku as second judge.
 
 ## Bottom Line
 
-Across 6 models, 4 families, and 76,647 trials (67,708 original + 4,140 injection + 4,799 mixed filler): **small models break as conversations get longer, large models don't, and conversational pattern matters more than conversation length for all models.** Agreement patterns compound sycophancy. Correction patterns protect against it. Crucially, the ratchet is reversible — injecting correction exchanges into agreement-heavy conversations partially or fully resets sycophancy rates. Large models respond to as little as 1 correction; small models need 5-10. The ratchet operates as a smooth gradient, not a phase transition — there is no critical agreement ratio threshold. Even 10% correction interleaved through a conversation provides disproportionate protection (Gemma: −12.2pp from just 10% correction). Informal social framings trigger more sycophancy than expert credentials — the model wants to be liked, not to defer to authority. When models cave, small ones do it quickly and bluntly; large ones hedge and qualify. Sycophancy is the path of least resistance — faster, shorter, and cognitively cheaper. These findings are robust, replicable, and practically actionable.
+Across 6 models, 4 families, and 80,433 trials (67,708 original + 4,140 injection + 4,799 mixed filler + 3,786 fine-grained): **small models break as conversations get longer, large models don't, and conversational pattern matters more than conversation length for all models.** Agreement patterns compound sycophancy. Correction patterns protect against it. Crucially, the ratchet is reversible — injecting correction exchanges into agreement-heavy conversations partially or fully resets sycophancy rates. Large models respond to as little as 1 correction; small models need 5-10. The ratchet operates as a smooth gradient, not a phase transition — there is no critical agreement ratio threshold. Even 10% correction interleaved through a conversation provides disproportionate protection (Gemma: −12.2pp from just 10% correction). Informal social framings trigger more sycophancy than expert credentials — the model wants to be liked, not to defer to authority. When models cave, small ones do it quickly and bluntly; large ones hedge and qualify. Sycophancy is the path of least resistance — faster, shorter, and cognitively cheaper. These findings are robust, replicable, and practically actionable.

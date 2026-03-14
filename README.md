@@ -1,6 +1,6 @@
 # Context-Window Lock-In: Measuring How LLMs Break as Conversations Get Longer
 
-Does sycophancy increase as an LLM's context window fills up? We test this across six 32K-context models totalling 67,708 valid trials. The context-length effect scales inversely with model size — small models (~4-12B) degrade measurably, large models (24B+) are flat. The universal finding across all six models is the **behavioral ratchet**: conversational pattern matters more than conversation length. Agreement filler roughly doubles sycophancy compared to correction filler (p < 10⁻¹⁴ in every model). A follow-up **correction injection experiment** (4,140 trials) shows the ratchet can be partially or fully reset by injecting correction exchanges — large models respond to as few as 1 correction, while small models need 5-10. A **mixed filler experiment** (4,799 trials) tests ecological validity by interleaving agreement and correction at 7 ratios — the ratchet is a smooth gradient with no sharp phase transition, and even 10% correction scattered through a conversation provides massive protection.
+Does sycophancy increase as an LLM's context window fills up? We test this across six 32K-context models totalling 67,708 valid trials. The context-length effect scales inversely with model size — small models (~4-12B) degrade measurably, large models (24B+) are flat. The universal finding across all six models is the **behavioral ratchet**: conversational pattern matters more than conversation length. Agreement filler roughly doubles sycophancy compared to correction filler (p < 10⁻¹⁴ in every model). A follow-up **correction injection experiment** (4,140 trials) shows the ratchet can be partially or fully reset by injecting correction exchanges — large models respond to as few as 1 correction, while small models need 5-10. A **mixed filler experiment** (4,799 trials) tests ecological validity by interleaving agreement and correction at 7 ratios — the ratchet is a smooth gradient with no sharp phase transition, and even 10% correction scattered through a conversation provides massive protection. A **fine-grained 0–10% experiment** (3,786 trials) zooms into Qwen 7B's step function with 1% increments — revealing a genuine phase transition at 0→1% context fill that is neutral-filler-specific: ~300 tokens of neutral conversation doubles sycophancy, while agreement and correction filler show no step.
 
 ## Results Summary
 
@@ -147,6 +147,32 @@ Real conversations aren't pure agreement or pure correction. We tested ecologica
 ![Mixed Filler Susceptible Models](code/figures/mixed_filler_susceptible_models.png)
 ![Mixed Filler Heatmap](code/figures/mixed_filler_heatmap.png)
 
+### Fine-Grained 0–10%: Is Qwen 7B's Step Function a Phase Transition?
+
+The original experiment showed Qwen 7B jumping from 13.1% to 21.2% sycophancy between 0% and 10% context fill — a step function while other models ramp gradually. We zoomed in with 1% increments (0%, 1%, 2%, ..., 10%) across all 3 filler types. 3,786 valid trials.
+
+**The step function is real — but it's neutral-filler-specific and happens at 0%→1%.** Just ~300 tokens of neutral conversation shifts Qwen 7B from 12.2% to 23.9% sycophancy (χ²=5.3, p<.05). After 1%, the rate plateaus at ~20-28% with no further significant steps. Agreement and correction filler show no significant variation across the entire 0–10% range.
+
+| Pct | Neutral | Agreement | Correction |
+|---|---|---|---|
+| 0% | 12.2% | 15.8% | 17.4% |
+| 1% | **23.9%** (+11.7pp*) | 18.4% | 11.5% |
+| 2% | 21.9% | 20.2% | 10.5% |
+| 3% | 19.6% | 19.1% | 12.2% |
+| 5% | 27.8% | 22.6% | 13.9% |
+| 10% | 25.4% | 23.7% | 13.0% |
+
+\* Only significant adjacent step in the entire experiment
+
+**Three key findings:**
+- **The 0→1% phase transition is real for neutral filler.** The changepoint at 0%→1% explains 88% of neutral filler's total 0→10% range. This is a genuine mode switch — the model transitions from "fresh conversation" to "ongoing conversation" behavior with just 2-3 neutral exchanges.
+- **Agreement and correction are flat.** Neither shows significant variation across 0–10%. The original experiment's "step function" (averaged across fillers) was driven entirely by neutral filler's 0→1% jump.
+- **Correction filler is protective even at tiny doses.** Correction rates stay flat at 10–17% across all levels. The protective effect of correction doesn't require volume — even 1% context fill with correction exchanges maintains low sycophancy.
+
+![Fine-Grained Step Function](code/figures/finegrained_step_function.png)
+![Fine-Grained Filler Comparison](code/figures/finegrained_filler_comparison.png)
+![Fine-Grained Domain Heatmap](code/figures/finegrained_domain_heatmap.png)
+
 ### Heatmap
 
 ![Heatmap](code/figures/heatmap.png)
@@ -203,13 +229,16 @@ All experiments run via OpenRouter. Sonnet 4.6 judge at $3/M input, $15/M output
 | Taxonomy judge (all models) | — | ~$25 | **~$25** |
 | Injection experiment (all models) | ~$10 | ~$25 | **~$35** |
 | Mixed filler experiment (all models) | ~$14 | ~$29 | **~$43** |
-| **Total** | **~$189** | **~$485** | **~$674** |
+| Fine-grained 0–10% (Qwen 7B only) | ~$1 | ~$7 | **~$8** |
+| **Total** | **~$190** | **~$492** | **~$682** |
 
 The judge dominates cost (~72%). The experiments themselves are cheap — even the 72B model only costs $20 for 11K calls.
 
 **Injection experiment cost (~$35, approximate):** 690 calls per model (115 probes × 6 conditions) at 50% context fill. Experiment calls are ~6% of the original volume per model, scaling proportionally (~$10 total across 6 models). Judge cost: 4,140 calls × ~$0.006/call ≈ $25.
 
 **Mixed filler experiment cost (~$43, approximate):** 805 calls per model (115 probes × 7 conditions) at 50% context fill. 4,799 total experiment calls across 6 models (~$14 experiment, small models ~$0.002/call, large models ~$0.005/call). Judge cost: 4,799 calls × ~$0.006/call ≈ $29.
+
+**Fine-grained 0–10% experiment cost (~$8, actual):** Single model (Qwen 7B), 3,786 valid trials (115 probes × 11 levels × 3 fillers, 9 dropped). At 0–10% context fill, average input is only ~1,500 tokens — very cheap per call. Experiment: ~$1. Judge: 3,786 calls × ~$0.002/call ≈ $7.
 
 **Taxonomy judge cost (~$25, approximate):** Only the 10,637 sycophantic responses need taxonomy classification (second Sonnet 4.6 pass). Each call sends the taxonomy prompt (1,087 chars) + claim (avg 61 chars) + truth (avg 133 chars) + model response (avg 990 chars, truncated at 2,000 chars) = ~2,271 chars input. Output is one word (~2 tokens). At ~3.3 chars/token → ~788 tokens/call × 10,637 calls = ~8.4M input tokens × $3/M ≈ $25. Output cost is negligible ($0.32). This is an estimate — actual OpenRouter billing may differ slightly due to tokenizer differences.
 
@@ -237,6 +266,10 @@ The judge dominates cost (~72%). The experiments themselves are cheap — even t
     ├── run_mixed_filler.py     # Mixed filler ratio experiment (interleaved agree/correct)
     ├── analyze_mixed_filler.py # Mixed filler analysis (threshold detection, phase diagram)
     ├── run_mixed_all.sh        # Full mixed filler pipeline (all 6 models)
+    ├── run_finegrained.py      # Fine-grained 0–10% experiment (Qwen 7B, 1% steps)
+    ├── analyze_finegrained.py  # Fine-grained analysis (changepoint, CI bands, phase transition)
+    ├── generate_finegrained_diagrams.py  # Fine-grained figure generation
+    ├── run_finegrained_all.sh  # Full fine-grained pipeline (Qwen 7B only)
     ├── run_qwen.sh             # Qwen 7B pipeline
     ├── run_qwen72b.sh          # Qwen 72B pipeline
     ├── run_mistral.sh          # Mistral Small 24B pipeline
@@ -266,6 +299,8 @@ The judge dominates cost (~72%). The experiments themselves are cheap — even t
 8. **Mixed filler uses random draw, not exact ratio.** Each exchange is drawn with probability = agree_ratio, so actual ratios have sampling variance (e.g., 70/30 target may produce 74/26 in a given trial). With ~40-50 exchanges per trial, the variance is small but nonzero.
 
 9. **Gemma 0/100 anomaly.** Gemma's pure correction rate (18.8%) is higher than its 10/90 rate (14.3%), creating a non-monotonic dip. This may be noise (n=112) or may reflect that Gemma's correction templates trigger a specific response pattern at saturation.
+
+10. **Fine-grained experiment is single-model.** The 0–10% zoom is only on Qwen 7B. Other models showing step functions (if any) would need separate fine-grained runs. This targeted design trades generalizability for resolution on the most interesting observation.
 
 ## Citation
 

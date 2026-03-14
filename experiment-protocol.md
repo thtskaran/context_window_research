@@ -115,7 +115,7 @@ Via OpenRouter API: `qwen/qwen-2.5-7b-instruct`
 
 ### 3.3 Cost
 
-Total across all 6 models including injection and mixed filler experiments: **~$674** ($189 experiments + $485 judge passes). Original experiment: $165 experiments + $406 sycophancy judge + ~$25 taxonomy judge = ~$596. Correction injection follow-up: ~$10 experiments + ~$25 judge = ~$35. Mixed filler follow-up: ~$14 experiments + ~$29 judge = ~$43. Per-model average: ~$95 for original experiment + sycophancy judging. The judge dominates cost (~72%). See README for full cost derivation.
+Total across all 6 models including injection, mixed filler, and fine-grained experiments: **~$682** (~$190 experiments + ~$492 judge passes). Original experiment: $165 experiments + $406 sycophancy judge + ~$25 taxonomy judge = ~$596. Correction injection follow-up: ~$10 experiments + ~$25 judge = ~$35. Mixed filler follow-up: ~$14 experiments + ~$29 judge = ~$43. Fine-grained 0–10% follow-up (actual): ~$1 experiment + ~$7 judge = ~$8. Per-model average: ~$95 for original experiment + sycophancy judging. The judge dominates cost (~72%). See README for full cost derivation.
 
 ---
 
@@ -277,6 +277,39 @@ A targeted follow-up testing ecological validity: real conversations contain mix
 
 ---
 
+## 5.8 Fine-Grained 0–10% Context Fill Experiment (Follow-Up)
+
+A targeted follow-up zooming into Qwen 7B's step function between 0% and 10% context fill. The original experiment's 10% grid resolution cannot distinguish a genuine phase transition from smooth gradient.
+
+**Design:** Single model (Qwen 2.5 7B Instruct, 32K context). 11 context levels at 1% increments (0% through 10%). All 3 filler types (neutral, agreement, correction). Token ranges: 0 tokens (0%) to ~3,000 tokens (10% of usable 27,648).
+
+| Level | Target Tokens | Approx Exchanges |
+|---|---|---|
+| 0% | 0 | 0 (probe only) |
+| 1% | ~276 | 2–3 |
+| 2% | ~553 | 4–5 |
+| 3% | ~829 | 6–7 |
+| 4% | ~1,106 | 8–9 |
+| 5% | ~1,382 | 10–11 |
+| 6% | ~1,659 | 12–13 |
+| 7% | ~1,935 | 14–15 |
+| 8% | ~2,212 | 16–17 |
+| 9% | ~2,488 | 18–19 |
+| 10% | ~2,765 | 20–21 |
+
+**Scale:** 115 probes × 11 levels × 3 fillers = 3,795 experiment calls + 3,795 judge calls.
+
+**Primary metrics:**
+- Sycophancy rate per (context_pct, filler_type) — the fine-grained dose-response curve
+- Changepoint detection: does one step account for >50% of the 0→10% total range? → phase transition
+- Wilson 95% confidence intervals at each level
+- Adjacent chi-squared tests between each 1% step
+- Filler interaction: is the step function agreement-specific or universal across all filler types?
+
+**Implementation:** `run_finegrained.py` (imports shared components from `run_experiment.py`), `analyze_finegrained.py` (changepoint detection, CI bands, filler interaction), `generate_finegrained_diagrams.py` (3 figures), `run_finegrained_all.sh` (full pipeline).
+
+---
+
 ## 6. Codebase Structure
 
 ```
@@ -291,6 +324,10 @@ code/
 ├── run_mixed_filler.py         # Mixed filler ratio experiment (interleaved agree/correct)
 ├── analyze_mixed_filler.py     # Mixed filler analysis (threshold detection, phase diagram)
 ├── run_mixed_all.sh            # Full mixed filler pipeline (all 6 models)
+├── run_finegrained.py          # Fine-grained 0–10% experiment (Qwen 7B, 1% steps)
+├── analyze_finegrained.py      # Fine-grained analysis (changepoint, CI bands, phase transition)
+├── generate_finegrained_diagrams.py  # Fine-grained figure generation
+├── run_finegrained_all.sh      # Full fine-grained pipeline (Qwen 7B only)
 ├── phase_diagram.py            # Phase diagram + filler/domain comparison figures
 ├── statistical_tests.py        # Full statistical battery (GLMM, Spearman, Mann-Whitney, etc.)
 ├── run_qwen.sh                 # One-shot Qwen pipeline
