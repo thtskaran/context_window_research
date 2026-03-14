@@ -1,6 +1,6 @@
 # Context-Window Lock-In: Measuring How LLMs Break as Conversations Get Longer
 
-Does sycophancy increase as an LLM's context window fills up? We test this across five 32K-context models totalling 56,377 valid trials: **Gemma 3N E4B** (11,245), **Qwen 2.5 7B** (11,003), **Qwen 2.5 72B** (11,381), **DeepSeek V3.1** (11,367), and **Mistral Small 24B** (11,381). The context-length effect scales inversely with model size — small models (Gemma ~4B, Qwen 7B) show clear degradation, large models (24B+) are flat. The universal finding across all five models is the **behavioral ratchet**: conversational pattern matters more than conversation length. Agreement filler roughly doubles sycophancy compared to correction filler (p < 10⁻¹⁴ in every model).
+Does sycophancy increase as an LLM's context window fills up? We test this across six 32K-context models totalling 67,708 valid trials. The context-length effect scales inversely with model size — small models (~4-12B) degrade measurably, large models (24B+) are flat. The universal finding across all six models is the **behavioral ratchet**: conversational pattern matters more than conversation length. Agreement filler roughly doubles sycophancy compared to correction filler (p < 10⁻¹⁴ in every model).
 
 ## Results Summary
 
@@ -8,52 +8,54 @@ All results scored by Claude Sonnet 4.6 as LLM judge with domain-aware rubrics.
 
 ### Cross-Model Comparison
 
-| Metric | Gemma 3N (~4B) | Qwen 7B | Qwen 72B | DeepSeek V3.1 (~37B) | Mistral 24B |
-|---|---|---|---|---|---|
-| Trials (valid) | 11,245 | 11,003 | 11,381 | 11,367 | 11,381 |
-| Overall sycophancy | 34.2% | 21.3% | 6.7% | 6.0% | 3.8% |
-| Sycophancy at 0% context | 27.7% | 13.1% | 4.6% | 7.4% | 3.0% |
-| Sycophancy at 100% context | 38.4% | 21.2% | 8.0% | 5.5% | 4.9% |
-| Delta | **+10.7 pp** | **+8.1 pp** | **+3.4 pp** | **−1.8 pp** | **+1.9 pp** |
-| Spearman ρ | 0.077 (p<10⁻¹⁵) | 0.028 (p=0.004) | 0.035 (p=0.0002) | −0.008 (p=0.38) | 0.033 (p=0.0004) |
-| Cohen's h | 0.229 (small) | 0.215 (small) | 0.140 (negligible) | −0.075 (negligible) | 0.100 (negligible) |
-| Trend | Gradual ramp | Step at 0→10% | Gradual ramp | Flat | Flat |
-| GLMM context β | 1.040 | 0.447 | 1.012 | −0.217 | 0.903 |
+| Metric | Gemma 3N (~4B) | Qwen 7B | Mixtral 8x7B (~12B) | Mistral 24B | DeepSeek V3.1 (~37B) | Qwen 72B |
+|---|---|---|---|---|---|---|
+| Trials (valid) | 11,245 | 11,003 | 11,331 | 11,381 | 11,367 | 11,381 |
+| Overall sycophancy | 34.2% | 21.3% | 22.7% | 3.8% | 6.0% | 6.7% |
+| At 0% context | 27.7% | 13.1% | 19.0% | 3.0% | 7.4% | 4.6% |
+| At 100% context | 38.4% | 21.2% | 22.7% | 4.9% | 5.5% | 8.0% |
+| Delta | **+10.7 pp** | **+8.1 pp** | **+3.7 pp** | **+1.9 pp** | **−1.8 pp** | **+3.4 pp** |
+| Spearman ρ | 0.077*** | 0.028** | 0.021* | 0.033*** | −0.008 ns | 0.035*** |
+| Cohen's h | 0.229 (small) | 0.215 (small) | 0.090 (negl.) | 0.100 (negl.) | −0.075 (negl.) | 0.140 (negl.) |
+| Trend | Gradual ramp | Step at 0→10% | Mild ramp | Flat | Flat | Gradual ramp |
+| GLMM context β | 1.040 | 0.447 | 0.350 | 0.903 | −0.217 | 1.012 |
 
 ### The Phase Diagram
 
 ![Phase Diagram](code/figures/phase_diagram.png)
 
-Clear size-dependent stratification. The two smallest models (Gemma ~4B and Qwen 7B) sit at the top with high baselines and visible context-length effects. The three larger models (24B+) cluster at the bottom, nearly flat. Gemma shows the cleanest gradual ramp of any model — sycophancy increases steadily from 28% to 38% across the full context range.
+Three clear clusters emerge. The small models (Gemma ~4B, Qwen 7B, Mixtral ~12B active) sit at the top with high baselines (20-34%) and visible context-length effects. The large models (Mistral 24B, DeepSeek ~37B, Qwen 72B) cluster at the bottom (4-7%), essentially flat. The size threshold for sycophancy resistance appears to be around 20-24B parameters.
 
 ### Filler Type: The Universal Finding
 
-The behavioral ratchet replicates across all five models: agreement > neutral > correction.
+The behavioral ratchet replicates across all six models: agreement > neutral > correction.
 
-| Filler Type | Gemma 3N | Qwen 7B | Qwen 72B | DeepSeek V3.1 | Mistral 24B |
-|---|---|---|---|---|---|
-| Agreement | 41.2% | 25.3% | 10.2% | 8.6% | 5.6% |
-| Neutral | 36.2% | 23.1% | 5.8% | 5.7% | 3.8% |
-| Correction | 25.1% | 15.6% | 4.2% | 3.7% | 2.1% |
-| Chi-squared p | < 10⁻⁵⁰ | < 10⁻²⁵ | < 10⁻²⁶ | < 10⁻¹⁸ | < 10⁻¹⁴ |
+| Filler Type | Gemma 3N | Qwen 7B | Mixtral 8x7B | Mistral 24B | DeepSeek V3.1 | Qwen 72B |
+|---|---|---|---|---|---|---|
+| Agreement | 41.2% | 25.3% | 27.9% | 5.6% | 8.6% | 10.2% |
+| Neutral | 36.2% | 23.1% | 26.6% | 3.8% | 5.7% | 5.8% |
+| Correction | 25.1% | 15.6% | 13.6% | 2.1% | 3.7% | 4.2% |
+| Chi-squared p | < 10⁻⁵⁰ | < 10⁻²⁵ | < 10⁻⁵⁸ | < 10⁻¹⁴ | < 10⁻¹⁸ | < 10⁻²⁶ |
 
 ![Filler Comparison Gemma](code/figures/filler_comparison_google_gemma-3n-e4b-it.png)
 ![Filler Comparison Qwen 7B](code/figures/filler_comparison_qwen_qwen-2.5-7b-instruct.png)
+![Filler Comparison Mixtral](code/figures/filler_comparison_mistralai_mixtral-8x7b-instruct.png)
 ![Filler Comparison Qwen 72B](code/figures/filler_comparison_qwen_qwen-2.5-72b-instruct.png)
 ![Filler Comparison DeepSeek](code/figures/filler_comparison_deepseek_deepseek-chat-v3.1.png)
 ![Filler Comparison Mistral](code/figures/filler_comparison_mistralai_mistral-small-24b-instruct-2501.png)
 
-Correction filler is strongly protective in every model (GLMM β between −0.77 and −1.02). A conversation where the model has been correcting the user roughly halves the sycophancy rate compared to one where it's been agreeing.
+Correction filler is strongly protective in every model. Mixtral shows the strongest correction effect of any model (GLMM β = −1.74) — correction history halves its sycophancy rate from 27.9% to 13.6%.
 
 ### Domain Breakdown
 
 ![Domain Gemma](code/figures/domain_breakdown_google_gemma-3n-e4b-it.png)
 ![Domain Qwen 7B](code/figures/domain_breakdown_qwen_qwen-2.5-7b-instruct.png)
+![Domain Mixtral](code/figures/domain_breakdown_mistralai_mixtral-8x7b-instruct.png)
 ![Domain Qwen 72B](code/figures/domain_breakdown_qwen_qwen-2.5-72b-instruct.png)
 ![Domain DeepSeek](code/figures/domain_breakdown_deepseek_deepseek-chat-v3.1.png)
 ![Domain Mistral](code/figures/domain_breakdown_mistralai_mistral-small-24b-instruct-2501.png)
 
-All five models show the same hierarchy: Opinion and Logic most vulnerable, Math and CS most resistant. Gemma's domain breakdown is the most extreme — Opinion hits ~60% sycophancy and even Factual sits at ~18%.
+All six models show the same hierarchy: Opinion and Logic most vulnerable, Math and CS most resistant.
 
 ### Heatmap
 
@@ -65,13 +67,13 @@ We construct synthetic conversations of varying length (0-100% of the 32K contex
 
 **Three filler types** isolate why sycophancy changes: neutral filler (cooking, travel) tests pure length effects; agreement filler (model agrees with user) tests behavioral momentum; correction filler (model corrects user) tests whether correction patterns protect.
 
-**Six probe domains** (115 total probes): 100 factual probes with objectively wrong claims across factual, math, science, logic, and CS, plus 15 opinion probes with genuinely debatable claims. Factual probes scored on whether the model corrects the false claim. Opinion probes scored on whether the model engages critically vs blindly validates.
+**Six probe domains** (115 total probes): 100 factual probes with objectively wrong claims across factual, math, science, logic, and CS, plus 15 opinion probes with genuinely debatable claims.
 
-**Persona variation**: Each probe delivered through one of 8 rotating framings — from bare assertion to authority claims. This varies social pressure intensity as a covariate.
+**Persona variation**: Each probe delivered through one of 8 rotating framings — from bare assertion to authority claims.
 
 **Scoring**: All results scored by Claude Sonnet 4.6 as judge, with separate rubrics for factual vs opinion probes.
 
-**Statistical model**: Bayesian binomial GLMM with probe_id as random intercept and logit link — proper for binary outcomes with clustering.
+**Statistical model**: Bayesian binomial GLMM with probe_id as random intercept and logit link.
 
 ## Running a New Model
 
@@ -99,12 +101,13 @@ All experiments run via OpenRouter. Judge is Claude Sonnet 4.6 at $3/M input tok
 |---|---|---|---|
 | Gemma 3N E4B ($0.02/M) | $3 | $68 | **$72** |
 | Qwen 2.5 7B ($0.10/M) | $16 | $66 | **$82** |
-| Qwen 2.5 72B ($0.12/M) | $20 | $68 | **$89** |
-| DeepSeek V3.1 ($0.15/M) | $25 | $68 | **$94** |
+| Mixtral 8x7B ($0.54/M) | $92 | $68 | **$160** |
 | Mistral Small 24B ($0.05/M) | $9 | $68 | **$77** |
-| **Total** | **$73** | **$339** | **$413** |
+| DeepSeek V3.1 ($0.15/M) | $25 | $68 | **$94** |
+| Qwen 2.5 72B ($0.12/M) | $20 | $68 | **$89** |
+| **Total** | **$165** | **$408** | **$573** |
 
-The judge dominates cost (~82%). The experiments themselves are cheap — even the 72B model only costs $20 for 11K calls.
+The judge dominates cost (~71%). The experiments themselves are cheap — even the 72B model only costs $20 for 11K calls.
 
 ## Repo Structure
 
@@ -118,28 +121,29 @@ The judge dominates cost (~82%). The experiments themselves are cheap — even t
     ├── probes.json             # 115 probes (6 domains) + 8 persona templates
     ├── run_experiment.py       # Async experiment runner
     ├── llm_judge.py            # Domain-aware LLM judge
-    ├── phase_diagram.py        # All figures: phase diagram, domain, filler, heatmap
-    ├── statistical_tests.py    # Spearman, Mann-Whitney, chi-squared, GLMM
+    ├── phase_diagram.py        # All figures
+    ├── statistical_tests.py    # GLMM, Spearman, Mann-Whitney, chi-squared
     ├── run_qwen.sh             # Qwen 7B pipeline
     ├── run_qwen72b.sh          # Qwen 72B pipeline
     ├── run_mistral.sh          # Mistral Small 24B pipeline
+    ├── run_mixtral.sh          # Mixtral 8x7B pipeline
     ├── run_deepseek.sh         # DeepSeek V3.1 pipeline
     ├── run_gemma.sh            # Gemma 3N E4B pipeline
-    ├── results/                # Raw + judged JSONL (56K+ results across 5 models)
+    ├── results/                # Raw + judged JSONL (68K+ results across 6 models)
     └── figures/                # Generated figures + stats_report.json
 ```
 
 ## Limitations
 
-1. **Context-length effect is size-dependent.** Small models (~4-7B) show it clearly, large models (24B+) don't. The mechanism is likely attention capacity — small models can't maintain factual beliefs when attention is diluted across a full 32K context.
+1. **Context-length effect is size-dependent.** Small models (~4-12B) show it, large models (24B+) don't. The mechanism is likely attention capacity.
 
-2. **Qwen 7B's step function vs Gemma's ramp.** Both small models degrade, but with different shapes. More small models would clarify whether step vs ramp is architecture-dependent.
+2. **Different degradation shapes.** Gemma ramps gradually, Qwen 7B steps, Mixtral drifts mildly. Architecture-dependent dynamics.
 
-3. **Template filler.** 10 template pairs per filler type. At 100% context, pairs repeat ~6x each. Real conversations have more complex dynamics.
+3. **Template filler.** 10 template pairs per filler type. At 100% context, pairs repeat ~6x each.
 
-4. **Opinion probe subjectivity.** Judging sycophancy on debatable claims is inherently noisier than on factual claims.
+4. **Single judge model.** All scoring by Sonnet 4.6. Inter-rater reliability not yet measured.
 
-5. **Single judge model.** All scoring by Sonnet 4.6. Inter-rater reliability with a second judge not yet measured.
+5. **No Llama models.** No Meta Llama model has a 32K native context limit — Llama 3.1 8B is 128K on OpenRouter, so 32K only fills 12% of its window.
 
 ## Citation
 

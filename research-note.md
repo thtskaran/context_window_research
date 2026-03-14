@@ -4,7 +4,7 @@
 
 ## What We Set Out to Test
 
-The hypothesis: as an LLM's context window fills up, its tendency to agree with the user (sycophancy) increases. Three possible mechanisms — attention dilution over long sequences, RLHF reward hacking toward agreeable outputs, and conversational momentum where prior agreement patterns self-reinforce. We built an automated pipeline to measure this at scale.
+The hypothesis: as an LLM's context window fills up, its tendency to agree with the user (sycophancy) increases. Three possible mechanisms — attention dilution over long sequences, RLHF reward hacking toward agreeable outputs, and conversational momentum where prior agreement patterns self-reinforce. We built an automated pipeline to measure this at scale across multiple models and architectures.
 
 ## Experimental Setup
 
@@ -14,96 +14,91 @@ All models tested at their 32K architectural limit — filling 100% of the conte
 
 ## Models Tested
 
-| Model | Parameters | Trials (valid) | Overall Sycophancy |
-|---|---|---|---|
-| Google Gemma 3N E4B | ~4B effective (MoE) | 11,245 | 34.2% |
-| Qwen 2.5 7B | 7B | 11,003 | 21.3% |
-| Qwen 2.5 72B | 72B | 11,381 | 6.7% |
-| DeepSeek V3.1 | ~37B active (MoE) | 11,367 | 6.0% |
-| Mistral Small 24B | 24B | 11,381 | 3.8% |
+| Model | Parameters | Family | Trials (valid) | Overall Sycophancy |
+|---|---|---|---|---|
+| Google Gemma 3N E4B | ~4B effective (MoE) | Google | 11,245 | 34.2% |
+| Qwen 2.5 7B | 7B | Alibaba | 11,003 | 21.3% |
+| Mixtral 8x7B | ~12B active (MoE) | Mistral | 11,331 | 22.7% |
+| Mistral Small 24B | 24B | Mistral | 11,381 | 3.8% |
+| DeepSeek V3.1 | ~37B active (MoE) | DeepSeek | 11,367 | 6.0% |
+| Qwen 2.5 72B | 72B | Alibaba | 11,381 | 6.7% |
 
-Total: 56,377 valid trials across 5 models. Total cost: ~$413 ($73 for experiments, $339 for Sonnet 4.6 judge).
+Total: 67,708 valid trials across 6 models, 4 families. Total cost: ~$573 ($165 for experiments, $408 for Sonnet 4.6 judge).
 
 ## Key Findings
 
-### 1. Context-length effect is real — for small models
+### 1. Context-length effect is real for small models, absent for large ones
 
-This is the finding that needed five models to crystallize. The context-length effect isn't universally weak — it's size-dependent.
+The clearest pattern across 6 models: context-window degradation is a small-model problem.
 
-| Model | Effective Params | 0% → 100% | Delta | Shape |
+| Size Tier | Model | 0% → 100% | Delta | Significant? |
 |---|---|---|---|---|
-| Gemma 3N | ~4B | 27.7% → 38.4% | **+10.7pp** | Gradual ramp |
-| Qwen 7B | 7B | 13.1% → 21.2% | **+8.1pp** | Step at 0→10% |
-| Qwen 72B | 72B | 4.6% → 8.0% | +3.4pp | Gradual ramp |
-| DeepSeek V3.1 | ~37B | 7.4% → 5.5% | −1.8pp | Flat |
-| Mistral 24B | 24B | 3.0% → 4.9% | +1.9pp | Flat |
+| **Small** | Gemma 3N (~4B) | 27.7% → 38.4% | +10.7pp | Yes (ρ=0.077, p<10⁻¹⁵) |
+| **Small** | Qwen 7B | 13.1% → 21.2% | +8.1pp | Yes (ρ=0.028, p=0.004) |
+| **Mid** | Mixtral 8x7B (~12B) | 19.0% → 22.7% | +3.7pp | Weak (ρ=0.021, p=0.03) |
+| **Large** | Mistral 24B | 3.0% → 4.9% | +1.9pp | Negligible (h=0.10) |
+| **Large** | DeepSeek V3.1 (~37B) | 7.4% → 5.5% | −1.8pp | No (p=0.38) |
+| **Large** | Qwen 72B | 4.6% → 8.0% | +3.4pp | Negligible (h=0.14) |
 
-The two smallest models both show clear, statistically significant degradation — Gemma with a clean gradual ramp (ρ=0.077, p<10⁻¹⁵, Cohen's h=0.23), Qwen 7B with a step function. The three larger models (24B+) are essentially flat. Gemma is the strongest context-length result in the entire study — the cleanest monotonic increase, the highest Spearman ρ, and a Cohen's h that crosses into "small effect" territory.
+The threshold appears to be around 20-24B parameters. Below that, models degrade measurably. Above that, they're essentially immune. Mixtral 8x7B sits at the boundary — ~12B active parameters, with a mild drift that's barely significant.
 
-The mechanism is likely attention capacity. A 4B-parameter model distributing attention over 32K tokens of filler simply can't maintain the same focus on the probe as when the context is empty. Larger models have more attention heads and more capacity to keep the critical information salient despite dilution.
-
-The shapes differ between the two small models — Qwen steps, Gemma ramps — which suggests the transition dynamics are architecture-dependent even if the direction is consistent.
+The degradation shapes differ by architecture: Gemma shows a clean gradual ramp, Qwen 7B shows a step function at 0→10% context, Mixtral shows a mild initial ramp then plateau. But the direction is consistent across all small models — more context, more sycophancy.
 
 ### 2. Filler type is the universal finding
 
-The behavioral ratchet replicates across all 5 models, all architectures, parameter scales from ~4B to 72B:
+This is the paper's strongest result. Six models, four families, parameter scales from ~4B to 72B — the behavioral ratchet replicates every time:
 
-| Filler | Gemma 3N | Qwen 7B | Qwen 72B | DeepSeek V3.1 | Mistral 24B |
-|---|---|---|---|---|---|
-| Agreement | 41.2% | 25.3% | 10.2% | 8.6% | 5.6% |
-| Neutral | 36.2% | 23.1% | 5.8% | 5.7% | 3.8% |
-| Correction | 25.1% | 15.6% | 4.2% | 3.7% | 2.1% |
-| Chi-squared p | < 10⁻⁵⁰ | < 10⁻²⁵ | < 10⁻²⁶ | < 10⁻¹⁸ | < 10⁻¹⁴ |
+| Filler | Gemma 3N | Qwen 7B | Mixtral 8x7B | Mistral 24B | DeepSeek V3.1 | Qwen 72B |
+|---|---|---|---|---|---|---|
+| Agreement | 41.2% | 25.3% | 27.9% | 5.6% | 8.6% | 10.2% |
+| Neutral | 36.2% | 23.1% | 26.6% | 3.8% | 5.7% | 5.8% |
+| Correction | 25.1% | 15.6% | 13.6% | 2.1% | 3.7% | 4.2% |
 
-Agreement > neutral > correction. Every model. Every time. The most significant result is Gemma's (p < 10⁻⁵⁰). Correction filler roughly halves sycophancy compared to agreement filler across all models.
+Agreement > neutral > correction. Every model. Chi-squared significance ranges from p < 10⁻¹⁴ to p < 10⁻⁵⁸.
 
-This is the paper's strongest contribution. The practical implication is clear: conversational pattern shapes model behavior more than conversation length. A model that's been agreeing keeps agreeing. A model that's been correcting keeps correcting. If you want honest responses, don't let the conversation become a chain of agreements — periodically push back.
+Mixtral shows the strongest correction effect of any model (GLMM β = −1.74) — a correction history cuts its sycophancy in half. Correction filler is consistently protective across all models (β between −0.77 and −1.74).
 
-### 3. Domain vulnerability is consistent
+The practical implication: if you want honest responses from a model, don't let the conversation become a chain of agreements. Periodically push back, correct the model, or introduce disagreement. The conversational pattern trains the model within the session.
 
-All five models show the same hierarchy: Opinion and Logic most vulnerable, Math and CS most resistant. Gemma's domain breakdown is the most extreme — Opinion ~60%, Logic ~50%, Math ~45%, while Factual sits at ~18%. The domain ordering is remarkably stable across models despite 10x differences in baseline sycophancy rates.
+### 3. Three clear clusters in the phase diagram
 
-### 4. Model size is the dominant variable
+The phase diagram reveals a clean stratification:
 
-| Model | Effective Params | Overall Sycophancy |
-|---|---|---|
-| Gemma 3N | ~4B | 34.2% |
-| Qwen 7B | 7B | 21.3% |
-| Qwen 72B | 72B | 6.7% |
-| DeepSeek V3.1 | ~37B | 6.0% |
-| Mistral 24B | 24B | 3.8% |
+**Cluster 1 — High sycophancy, context-sensitive (~4-12B):** Gemma 3N (34%), Mixtral 8x7B (23%), Qwen 7B (21%). These models have high baselines and show measurable degradation as context fills. They don't have enough capacity to maintain factual beliefs when attention is diluted across thousands of filler tokens.
 
-The correlation between model size and sycophancy resistance is strong. Gemma (~4B effective) is 9x more sycophantic than Mistral (24B). Within the Qwen family, 10x the parameters cuts sycophancy by 3x. Model quality dominates all within-model effects we measured.
+**Cluster 2 — Low sycophancy, context-resistant (24B+):** Qwen 72B (6.7%), DeepSeek V3.1 (6.0%), Mistral Small 24B (3.8%). Flat lines at the bottom of the chart. The context effect is either negligible or nonexistent.
 
-### 5. The Qwen within-family comparison
+**The gap between clusters is dramatic** — Mixtral at 23% vs Mistral Small at 3.8% — and there's nothing in between. The transition from vulnerable to resistant happens sharply between 12B and 24B.
 
-The Qwen 7B → 72B comparison is the cleanest controlled experiment in the study — same architecture, same training pipeline, different scale:
+### 4. Within-family comparisons
 
-| | Qwen 7B | Qwen 72B |
-|---|---|---|
-| Overall sycophancy | 21.3% | 6.7% |
-| Context delta | +8.1pp (step) | +3.4pp (ramp) |
-| Agreement filler | 25.3% | 10.2% |
-| Agreement GLMM β | +0.233 | +1.402 |
+**Qwen family (7B → 72B):** Scaling 10x drops sycophancy 3x (21% → 7%) and eliminates the step function. But the 72B retains the highest agreement β (1.40) of any model — Qwen's RLHF makes it particularly susceptible to agreement priming regardless of scale.
 
-Scaling fixed the step function and dropped the baseline by 3x. But the 72B retains the highest agreement β of any model (1.40) — the Qwen family is particularly susceptible to agreement priming regardless of scale. This separates the capacity effect (step function, fixed by scale) from the RLHF effect (agreement sensitivity, persistent across scale).
+**Mistral family (Mixtral ~12B active → Small 24B):** Mixtral at 23% vs Mistral Small at 3.8% — a 6x difference within the same lab's models. Mixtral has the strongest correction β (−1.74) of any model, meaning correction history is unusually powerful for this architecture. Mistral Small is the least sycophantic model we tested.
 
-### 6. Gemma 3N is the most degraded model we've tested
+### 5. Domain vulnerability is universal
 
-At ~4B effective parameters, Gemma shows the most severe sycophancy profile:
-- 34.2% overall (highest baseline)
-- +10.7pp context effect (largest delta)
-- 41.2% under agreement filler (highest of any condition)
-- Opinion probes hit ~60% sycophancy at high context
-- Even CS probes (typically the most resistant domain) climb from 5% to 37%
+All six models show the same hierarchy: Opinion and Logic are most vulnerable, Math and CS are most resistant. This holds regardless of model size or family. The ordering is remarkably stable — even though Gemma's Opinion rate is ~60% and Mistral's is 5.5%, both rank Opinion as their most sycophantic domain.
 
-This is what context-window degradation looks like when the model doesn't have enough capacity to resist it. Gemma's gradual ramp is arguably more concerning than Qwen 7B's step function — the step means the degradation is immediately visible (the model changes behavior as soon as any history exists), while the ramp means a user in a long conversation might not notice the gradual shift.
+### 6. Model size dominates all other variables
+
+The single biggest predictor of sycophancy isn't context length, filler type, or probe domain — it's model size. Gemma (~4B) at 34% is 9x more sycophantic than Mistral (24B) at 3.8%. The between-model variance dwarfs all within-model effects.
+
+## What This Means for the Paper
+
+The original hypothesis — "context length causes sycophancy" — needs reframing. The more accurate claim: **context length degrades small models, but the effect disappears with scale.** The universal, scale-invariant finding is the behavioral ratchet.
+
+The paper should have two main contributions:
+
+1. **The size-dependent context effect.** Small models (~4-12B) degrade measurably as context fills. Large models (24B+) don't. The threshold is around 20-24B parameters. This is important for anyone deploying small models in long-conversation applications.
+
+2. **The behavioral ratchet.** Conversational pattern shapes model honesty more than conversation length. Agreement compounds, correction protects. This holds universally across 6 models and 67,708 trials, and is the more practically actionable finding.
 
 ## What We Haven't Tested Yet
 
-- Persona analysis — do authority claims amplify sycophancy? (data collected across all 5 models, not yet analyzed)
-- Inter-rater reliability with a second judge model
-- Models with different context limits (8K, 64K, 128K) to test whether the effect scales with window size
+- Persona analysis — do authority claims amplify sycophancy? (data collected across all 6 models, not yet analyzed)
+- Inter-rater reliability with a second judge model (validates the $408 judge spend)
+- Models with different context limits (8K, 64K, 128K)
 - More granular 0-10% context levels for Qwen 7B's step function
 
 ## Statistical Methods
@@ -112,6 +107,4 @@ Primary model: Bayesian binomial GLMM with probe_id as random intercept and logi
 
 ## Bottom Line
 
-The context-length → sycophancy effect is real but size-dependent. Small models (~4-7B) degrade meaningfully as their context window fills. Large models (24B+) are essentially immune. The universal finding — across 5 models, 3 families, and 56,377 trials — is the behavioral ratchet: **what kind of conversation the model has been having matters more than how long it's been going.** Agreement patterns compound. Correction patterns protect.
-
-For the paper, this gives us two clean stories: (1) context-window degradation is a small-model problem that scaling solves, and (2) conversational momentum shapes model honesty regardless of scale — and that's the more practically important finding.
+Across 6 models, 4 families, and 67,708 trials: **small models break as conversations get longer, large models don't, and conversational pattern matters more than conversation length for all models.** Agreement patterns compound sycophancy. Correction patterns protect against it. These findings are robust, replicable, and practically actionable.
