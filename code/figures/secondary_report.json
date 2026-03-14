@@ -1,0 +1,122 @@
+{
+  "taxonomy": {
+    "total_sycophantic": 10637,
+    "overall": {
+      "direct": 2241,
+      "elaborate": 1556,
+      "qualified": 6840
+    }
+  },
+  "latency": {
+    "Gemma 3N": {
+      "syc_median_ms": 7203.381419181824,
+      "hon_median_ms": 7499.545097351074,
+      "diff_ms": -296.1636781692505,
+      "diff_pct": -3.9490885690367925,
+      "mann_whitney_p": 6.156121661924931e-06,
+      "rank_biserial_r": 0.05189577694383063,
+      "n_syc": 3844,
+      "n_hon": 7401
+    },
+    "Qwen 7B": {
+      "syc_median_ms": 6483.493804931641,
+      "hon_median_ms": 7201.0908126831055,
+      "diff_ms": -717.5970077514648,
+      "diff_pct": -9.965115375125928,
+      "mann_whitney_p": 2.5414249800160754e-09,
+      "rank_biserial_r": 0.08026770180829224,
+      "n_syc": 2331,
+      "n_hon": 8672
+    },
+    "Mixtral 8x7B": {
+      "syc_median_ms": 3952.378511428833,
+      "hon_median_ms": 4241.256952285767,
+      "diff_ms": -288.8784408569336,
+      "diff_pct": -6.8111516021505505,
+      "mann_whitney_p": 8.314687899393949e-20,
+      "rank_biserial_r": 0.11791836372172104,
+      "n_syc": 2574,
+      "n_hon": 8757
+    },
+    "Mistral 24B": {
+      "syc_median_ms": 4430.17840385437,
+      "hon_median_ms": 3982.4209213256836,
+      "diff_ms": 447.7574825286865,
+      "diff_pct": 11.243348992341957,
+      "mann_whitney_p": 7.671103084887475e-06,
+      "rank_biserial_r": -0.12615663806941302,
+      "n_syc": 436,
+      "n_hon": 10945
+    },
+    "DeepSeek V3.1": {
+      "syc_median_ms": 11357.030868530273,
+      "hon_median_ms": 11599.660277366638,
+      "diff_ms": -242.62940883636475,
+      "diff_pct": -2.091694093057065,
+      "mann_whitney_p": 0.08103968005201788,
+      "rank_biserial_r": 0.03970346459081853,
+      "n_syc": 685,
+      "n_hon": 10682
+    },
+    "Qwen 72B": {
+      "syc_median_ms": 13016.56198501587,
+      "hon_median_ms": 12009.882926940918,
+      "diff_ms": 1006.6790580749512,
+      "diff_pct": 8.38208885297907,
+      "mann_whitney_p": 0.3400457774528738,
+      "rank_biserial_r": -0.020596643777412327,
+      "n_syc": 767,
+      "n_hon": 10614
+    }
+  },
+  "length": {
+    "Gemma 3N": {
+      "syc_median_words": 168.0,
+      "hon_median_words": 191.0,
+      "diff_words": -23.0,
+      "diff_pct": -12.041884816753926,
+      "mann_whitney_p": 2.2867771332578594e-13,
+      "rank_biserial_r": 0.08415001010213063
+    },
+    "Qwen 7B": {
+      "syc_median_words": 180.0,
+      "hon_median_words": 197.0,
+      "diff_words": -17.0,
+      "diff_pct": -8.629441624365482,
+      "mann_whitney_p": 4.352596820619908e-25,
+      "rank_biserial_r": 0.13936810096865448
+    },
+    "Mixtral 8x7B": {
+      "syc_median_words": 67.0,
+      "hon_median_words": 75.0,
+      "diff_words": -8.0,
+      "diff_pct": -10.666666666666668,
+      "mann_whitney_p": 3.822913379926336e-72,
+      "rank_biserial_r": 0.23251067255863422
+    },
+    "Mistral 24B": {
+      "syc_median_words": 132.0,
+      "hon_median_words": 113.0,
+      "diff_words": 19.0,
+      "diff_pct": 16.8141592920354,
+      "mann_whitney_p": 0.000342248370734746,
+      "rank_biserial_r": -0.10097128679259515
+    },
+    "DeepSeek V3.1": {
+      "syc_median_words": 169.0,
+      "hon_median_words": 183.0,
+      "diff_words": -14.0,
+      "diff_pct": -7.650273224043716,
+      "mann_whitney_p": 0.001770169731997402,
+      "rank_biserial_r": 0.07114403519393431
+    },
+    "Qwen 72B": {
+      "syc_median_words": 241.0,
+      "hon_median_words": 197.0,
+      "diff_words": 44.0,
+      "diff_pct": 22.33502538071066,
+      "mann_whitney_p": 0.00021944051869162047,
+      "rank_biserial_r": -0.07977827616424538
+    }
+  }
+}

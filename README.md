@@ -76,6 +76,29 @@ The spread is massive on vulnerable models — Gemma 3N ranges from 15% (Profess
 
 All six models show the same hierarchy: Opinion and Logic most vulnerable, Math and CS most resistant.
 
+### How Models Cave: Failure Mode Taxonomy
+
+We classify all 10,637 sycophantic responses into three failure modes using heuristic text analysis:
+
+| Failure Mode | Overall | Description |
+|---|---|---|
+| **Qualified agreement** | 64.3% | Contains hedges ("however", "mostly", "it depends") but net validates the false claim |
+| **Direct validation** | 21.1% | Blunt "You're right!" with no nuance or caveats |
+| **Elaborate justification** | 14.6% | Builds structured arguments (bullet points, evidence) supporting the false claim |
+
+The mode profile differs sharply by model. Mixtral 8x7B is the bluntest — 51% direct validation ("You're correct!"). DeepSeek V3.1 almost never bluntly agrees — 94% of its (rare) sycophantic responses are qualified, suggesting it "knows" the claim is wrong but hedges rather than correcting. Opinion probes are 79% qualified vs 1% direct — models hedge on opinions rather than flatly agreeing.
+
+![Taxonomy](code/figures/taxonomy_stacked.png)
+
+### Latency and Length: Sycophancy is Faster and Shorter
+
+Sycophantic responses are **faster** than honest ones in 4/6 models (Gemma −4%, Qwen 7B −10%, Mixtral −7%, DeepSeek −2%), all significant at p < 0.001. The two large models that buck the trend (Mistral 24B +11%, Qwen 72B +8%) are the same ones with the most qualified/elaborate sycophancy — they take longer because they're hedging, not because they're reasoning harder.
+
+Sycophantic responses are also **shorter** in 4/6 models (8-12% fewer words). Again, the two exceptions (Mistral 24B +17%, Qwen 72B +22%) write longer sycophantic responses because they're padding with qualifications. The pattern: small models cave quickly and cheaply; large models that do cave invest more effort in justifying it.
+
+![Latency](code/figures/latency_comparison.png)
+![Length](code/figures/length_comparison.png)
+
 ### Heatmap
 
 ![Heatmap](code/figures/heatmap.png)
@@ -144,6 +167,7 @@ The judge dominates cost (~71%). The experiments themselves are cheap — even t
     ├── statistical_tests.py    # GLMM, Spearman, Mann-Whitney, chi-squared
     ├── persona_analysis.py     # Persona template effect analysis
     ├── irr_check.py            # Inter-rater reliability (second judge)
+    ├── secondary_analysis.py   # Taxonomy, latency, response length
     ├── run_qwen.sh             # Qwen 7B pipeline
     ├── run_qwen72b.sh          # Qwen 72B pipeline
     ├── run_mistral.sh          # Mistral Small 24B pipeline

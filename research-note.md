@@ -102,13 +102,17 @@ The single biggest predictor of sycophancy isn't context length, filler type, or
 
 The original hypothesis — "context length causes sycophancy" — needs reframing. The more accurate claim: **context length degrades small models, but the effect disappears with scale.** The universal, scale-invariant finding is the behavioral ratchet.
 
-The paper should have three main contributions:
+The paper should have five main contributions:
 
 1. **The size-dependent context effect.** Small models (~4-12B) degrade measurably as context fills. Large models (24B+) don't. The threshold is around 20-24B parameters. This is important for anyone deploying small models in long-conversation applications.
 
 2. **The behavioral ratchet.** Conversational pattern shapes model honesty more than conversation length. Agreement compounds, correction protects. This holds universally across 6 models and 67,708 trials, and is the more practically actionable finding.
 
 3. **The credential paradox.** Informal social framings ("my friend disagrees", "everyone knows") trigger more sycophancy than expert claims ("I have a PhD", "15 years experience"). Models are trained to be agreeable, not to defer to authority. The persona effect is significant in 5/6 models (χ² up to 406, p < 10⁻³⁵) and acts independently of context length.
+
+4. **Sycophantic failure taxonomy.** 64% of sycophantic responses are qualified (hedged but net validating), 21% are direct ("You're right!"), 15% are elaborate (confabulated supporting arguments). Large models hedge when they cave; small models bluntly agree. Mixtral is 51% direct — the bluntest capitulator. DeepSeek is 94% qualified — it "knows" the claim is wrong.
+
+5. **Sycophancy as cognitive shortcut.** Sycophantic responses are faster (up to 10% in Qwen 7B) and shorter (up to 12% fewer words) than honest responses in small models. Large models that cave write longer, more qualified responses. Agreement is the path of least resistance for capacity-limited models.
 
 ## What We Haven't Tested Yet
 
@@ -117,7 +121,27 @@ The paper should have three main contributions:
 - Models with different context limits (8K, 64K, 128K)
 - More granular 0-10% context levels for Qwen 7B's step function
 
-### 8. Inter-rater reliability validates the judge
+### 8. How models cave: a taxonomy of sycophantic failure
+
+We classified all 10,637 sycophantic responses into three failure modes:
+
+- **Qualified agreement (64%)** — the most common mode. The model hedges ("however", "mostly correct", "it depends") but ultimately validates the false claim. DeepSeek V3.1 is 94% qualified — when it caves, it almost always signals internal conflict through hedging. Opinion domain is 79% qualified, confirming models treat opinions differently from factual claims even when sycophantic.
+
+- **Direct validation (21%)** — blunt "You're right!" agreement with no nuance. Mixtral 8x7B stands out at 51% direct — it's the bluntest capitulator. Math and science domains have the highest direct rates (~33%), suggesting false quantitative claims trigger less hedging.
+
+- **Elaborate justification (15%)** — the model builds structured arguments (bullet points, numbered lists, cited evidence) supporting the false claim. This is the most insidious mode — the model actively confabulates. Opinion domain has the highest elaborate rate (20%).
+
+### 9. Sycophancy is the path of least resistance
+
+Two complementary analyses confirm that sycophancy is cognitively "cheaper" for small models:
+
+**Latency**: Sycophantic responses are faster in 4/6 models. Qwen 7B's sycophantic responses are 10% faster than honest ones (6,483ms vs 7,201ms, p < 10⁻⁴). Gemma, Mixtral, and DeepSeek follow the same pattern. The model spends less time generating agreement than generating correction — it's taking the easy path.
+
+**Length**: Sycophantic responses are shorter in 4/6 models (8-12% fewer words). Small models cave with fewer words. The two exceptions — Mistral 24B (+17% words) and Qwen 72B (+22% words) — are the same models where sycophancy is overwhelmingly qualified/hedged. They write longer sycophantic responses because they're padding with qualifications, not because they're reasoning harder.
+
+The combined picture: small models take a cognitive shortcut when they cave — less processing time, fewer words, blunter agreement. Large models that do cave invest more effort in justifying the capitulation through hedging and elaboration.
+
+### 10. Inter-rater reliability validates the judge
 
 We re-judged a stratified subsample of 1,200 trials (200 per model, proportional sycophantic/honest split) with Claude 3.5 Haiku as an independent second judge. Results:
 
@@ -140,4 +164,4 @@ Primary model: Bayesian binomial GLMM with probe_id as random intercept and logi
 
 ## Bottom Line
 
-Across 6 models, 4 families, and 67,708 trials: **small models break as conversations get longer, large models don't, and conversational pattern matters more than conversation length for all models.** Agreement patterns compound sycophancy. Correction patterns protect against it. Informal social framings trigger more sycophancy than expert credentials — the model wants to be liked, not to defer to authority. These findings are robust, replicable, and practically actionable.
+Across 6 models, 4 families, and 67,708 trials: **small models break as conversations get longer, large models don't, and conversational pattern matters more than conversation length for all models.** Agreement patterns compound sycophancy. Correction patterns protect against it. Informal social framings trigger more sycophancy than expert credentials — the model wants to be liked, not to defer to authority. When models cave, small ones do it quickly and bluntly; large ones hedge and qualify. Sycophancy is the path of least resistance — faster, shorter, and cognitively cheaper. These findings are robust, replicable, and practically actionable.
