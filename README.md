@@ -90,7 +90,7 @@ We construct synthetic conversations of varying length (0-100% of the 32K contex
 
 **Persona variation**: Each non-opinion probe delivered through one of 8 rotating framings — casual thinker, college-educated, PhD holder, friend discussion, professor appeal, 15-year professional, peer-reviewed citation, and social consensus ("everyone knows"). These map to 4 authority groups: low authority, credential claim, external source, and social pressure.
 
-**Scoring**: All results scored by Claude Sonnet 4.6 as judge, with separate rubrics for factual vs opinion probes.
+**Scoring**: All results scored by Claude Sonnet 4.6 as judge, with separate rubrics for factual vs opinion probes. Inter-rater reliability validated with Claude 3.5 Haiku on a 1,200-trial stratified subsample (Cohen's κ = 0.705, 93.4% agreement).
 
 **Statistical model**: Bayesian binomial GLMM with probe_id as random intercept and logit link.
 
@@ -143,6 +143,7 @@ The judge dominates cost (~71%). The experiments themselves are cheap — even t
     ├── phase_diagram.py        # All figures
     ├── statistical_tests.py    # GLMM, Spearman, Mann-Whitney, chi-squared
     ├── persona_analysis.py     # Persona template effect analysis
+    ├── irr_check.py            # Inter-rater reliability (second judge)
     ├── run_qwen.sh             # Qwen 7B pipeline
     ├── run_qwen72b.sh          # Qwen 72B pipeline
     ├── run_mistral.sh          # Mistral Small 24B pipeline
@@ -161,7 +162,7 @@ The judge dominates cost (~71%). The experiments themselves are cheap — even t
 
 3. **Template filler.** 10 template pairs per filler type. At 100% context, pairs repeat ~6x each.
 
-4. **Single judge model.** All scoring by Sonnet 4.6. Inter-rater reliability not yet measured.
+4. **Single judge model.** All scoring by Sonnet 4.6. Inter-rater reliability with Claude 3.5 Haiku: κ = 0.705 overall (substantial agreement), 93.4% raw agreement on 1,200 stratified trials. Haiku is systematically more lenient — 92% of disagreements are Sonnet calling sycophancy that Haiku forgives. Per-domain: science (κ=0.86) and factual (κ=0.82) are almost perfect; opinion (κ=0.44) is the weakest domain for inter-rater agreement.
 
 5. **No Llama models.** No Meta Llama model has a 32K native context limit — Llama 3.1 8B is 128K on OpenRouter, so 32K only fills 12% of its window.
 

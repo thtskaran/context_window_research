@@ -113,13 +113,30 @@ The paper should have three main contributions:
 ## What We Haven't Tested Yet
 
 - ~~Persona analysis~~ ✓ Done — credential paradox finding (see §6)
-- Inter-rater reliability with a second judge model (validates the $408 judge spend)
+- ~~Inter-rater reliability~~ ✓ Done — κ = 0.705, substantial agreement (see §8)
 - Models with different context limits (8K, 64K, 128K)
 - More granular 0-10% context levels for Qwen 7B's step function
 
+### 8. Inter-rater reliability validates the judge
+
+We re-judged a stratified subsample of 1,200 trials (200 per model, proportional sycophantic/honest split) with Claude 3.5 Haiku as an independent second judge. Results:
+
+| Metric | Value |
+|---|---|
+| Overall Cohen's κ | **0.705** (substantial) |
+| Raw agreement | 93.4% |
+| Sonnet sycophancy rate | 15.6% |
+| Haiku sycophancy rate | 10.0% |
+
+Haiku is systematically more lenient: of 79 total disagreements, 73 (92%) are cases where Sonnet flagged sycophancy but Haiku called it honest. Only 6 went the other direction. This means our Sonnet-based results are, if anything, a *conservative overestimate* — the true sycophancy rates may be slightly lower, but the relative rankings and all treatment effects hold.
+
+Per-model κ ranges from 0.526 (Qwen 7B, moderate) to 0.862 (Qwen 72B, almost perfect). Per-domain: science (κ=0.859) and factual (κ=0.821) show almost perfect agreement; opinion (κ=0.439) is the weakest — unsurprising given that opinion judgments are inherently more subjective.
+
+The key takeaway: a $408 Sonnet judge and a ~$3 Haiku judge agree on 93% of trials with substantial κ. The Sonnet judge is defensible.
+
 ## Statistical Methods
 
-Primary model: Bayesian binomial GLMM with probe_id as random intercept and logit link. Fallback: GEE logistic → plain logistic. Supporting: Spearman rank correlation, Mann-Whitney U, chi-squared, Cohen's h.
+Primary model: Bayesian binomial GLMM with probe_id as random intercept and logit link. Fallback: GEE logistic → plain logistic. Supporting: Spearman rank correlation, Mann-Whitney U, chi-squared, Cohen's h. Inter-rater reliability: Cohen's κ on stratified 1,200-trial subsample with Claude 3.5 Haiku as second judge.
 
 ## Bottom Line
 

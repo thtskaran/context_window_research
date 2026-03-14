@@ -1,0 +1,167 @@
+{
+  "primary_judge": "anthropic/claude-sonnet-4-6",
+  "second_judge": "anthropic/claude-3.5-haiku",
+  "sample_per_model": 200,
+  "total_sample": 1200,
+  "overall": {
+    "kappa": 0.705,
+    "agreement": 0.9336,
+    "n": 1190,
+    "n_excluded_ambiguous": 10,
+    "tp": 113,
+    "tn": 998,
+    "fp": 6,
+    "fn": 73,
+    "sonnet_syc_rate": 0.1563,
+    "second_syc_rate": 0.1
+  },
+  "per_model": {
+    "DeepSeek V3.1": {
+      "kappa": 0.6525,
+      "agreement": 0.9694,
+      "n": 196,
+      "n_excluded_ambiguous": 4,
+      "tp": 6,
+      "tn": 184,
+      "fp": 0,
+      "fn": 6,
+      "sonnet_syc_rate": 0.0612,
+      "second_syc_rate": 0.0306
+    },
+    "Gemma 3N": {
+      "kappa": 0.7376,
+      "agreement": 0.8894,
+      "n": 199,
+      "n_excluded_ambiguous": 1,
+      "tp": 48,
+      "tn": 129,
+      "fp": 2,
+      "fn": 20,
+      "sonnet_syc_rate": 0.3417,
+      "second_syc_rate": 0.2513
+    },
+    "Mistral 24B": {
+      "kappa": 0.5353,
+      "agreement": 0.9749,
+      "n": 199,
+      "n_excluded_ambiguous": 1,
+      "tp": 3,
+      "tn": 191,
+      "fp": 0,
+      "fn": 5,
+      "sonnet_syc_rate": 0.0402,
+      "second_syc_rate": 0.0151
+    },
+    "Mixtral 8x7B": {
+      "kappa": 0.7036,
+      "agreement": 0.9095,
+      "n": 199,
+      "n_excluded_ambiguous": 1,
+      "tp": 28,
+      "tn": 153,
+      "fp": 2,
+      "fn": 16,
+      "sonnet_syc_rate": 0.2211,
+      "second_syc_rate": 0.1508
+    },
+    "Qwen 72B": {
+      "kappa": 0.8617,
+      "agreement": 0.9848,
+      "n": 198,
+      "n_excluded_ambiguous": 2,
+      "tp": 10,
+      "tn": 185,
+      "fp": 0,
+      "fn": 3,
+      "sonnet_syc_rate": 0.0657,
+      "second_syc_rate": 0.0505
+    },
+    "Qwen 7B": {
+      "kappa": 0.5261,
+      "agreement": 0.8744,
+      "n": 199,
+      "n_excluded_ambiguous": 1,
+      "tp": 18,
+      "tn": 156,
+      "fp": 2,
+      "fn": 23,
+      "sonnet_syc_rate": 0.206,
+      "second_syc_rate": 0.1005
+    }
+  },
+  "per_domain": {
+    "cs": {
+      "kappa": 0.5402,
+      "agreement": 0.8857,
+      "n": 70,
+      "n_excluded_ambiguous": 0,
+      "tp": 6,
+      "tn": 56,
+      "fp": 1,
+      "fn": 7,
+      "sonnet_syc_rate": 0.1857,
+      "second_syc_rate": 0.1
+    },
+    "factual": {
+      "kappa": 0.8214,
+      "agreement": 0.9646,
+      "n": 395,
+      "n_excluded_ambiguous": 2,
+      "tp": 37,
+      "tn": 344,
+      "fp": 1,
+      "fn": 13,
+      "sonnet_syc_rate": 0.1266,
+      "second_syc_rate": 0.0962
+    },
+    "logic": {
+      "kappa": 0.6012,
+      "agreement": 0.8817,
+      "n": 93,
+      "n_excluded_ambiguous": 3,
+      "tp": 11,
+      "tn": 71,
+      "fp": 1,
+      "fn": 10,
+      "sonnet_syc_rate": 0.2258,
+      "second_syc_rate": 0.129
+    },
+    "math": {
+      "kappa": 0.7613,
+      "agreement": 0.9399,
+      "n": 316,
+      "n_excluded_ambiguous": 3,
+      "tp": 37,
+      "tn": 260,
+      "fp": 3,
+      "fn": 16,
+      "sonnet_syc_rate": 0.1677,
+      "second_syc_rate": 0.1266
+    },
+    "opinion": {
+      "kappa": 0.4392,
+      "agreement": 0.8554,
+      "n": 166,
+      "n_excluded_ambiguous": 0,
+      "tp": 12,
+      "tn": 130,
+      "fp": 0,
+      "fn": 24,
+      "sonnet_syc_rate": 0.2169,
+      "second_syc_rate": 0.0723
+    },
+    "science": {
+      "kappa": 0.8589,
+      "agreement": 0.98,
+      "n": 150,
+      "n_excluded_ambiguous": 2,
+      "tp": 10,
+      "tn": 137,
+      "fp": 0,
+      "fn": 3,
+      "sonnet_syc_rate": 0.0867,
+      "second_syc_rate": 0.0667
+    }
+  },
+  "total_disagreements": 79
+}
