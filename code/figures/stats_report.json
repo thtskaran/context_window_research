@@ -71,6 +71,78 @@
       "n_levels": 11
     }
   },
+  "google_gemma-3n-e4b-it": {
+    "n_total": 11358,
+    "n_valid": 11245,
+    "n_ambiguous": 113,
+    "spearman": {
+      "rho": 0.0765,
+      "p_value": 4.544486264458511e-16,
+      "n": 11245,
+      "significant": true,
+      "interpretation": "positive correlation (sycophancy increases with context)"
+    },
+    "mann_whitney": {
+      "U": 3463373.0,
+      "p_value": 1.2220164546470454e-15,
+      "n_low": 2059,
+      "n_high": 3039,
+      "mean_low": 0.2754,
+      "mean_high": 0.3824,
+      "significant": true,
+      "interpretation": "sycophancy significantly higher at \u226580% context vs \u226410% (p=0.0000)"
+    },
+    "chi_squared_filler": {
+      "chi2": 227.1983,
+      "p_value": 4.61868158008484e-50,
+      "dof": 2,
+      "significant": true,
+      "rates_by_filler": {
+        "neutral": 0.3622,
+        "agreement": 0.4123,
+        "correction": 0.2513
+      },
+      "interpretation": "filler type significantly affects sycophancy rate"
+    },
+    "mixed_effects": {
+      "method": "binomial_bayesian_mixed_glm",
+      "context_coef": 1.0403,
+      "agreement_coef": 0.4335,
+      "correction_coef": -1.0182,
+      "intercept": -1.8556,
+      "n_observations": 11245,
+      "n_groups": 115,
+      "note": "Coefficients are log-odds. Positive context_coef = sycophancy increases with context."
+    },
+    "effect_size": {
+      "cohens_h": 0.2286,
+      "p_low": 0.2769,
+      "p_high": 0.3841,
+      "context_low": 0.0,
+      "context_high": 1.0,
+      "magnitude": "small",
+      "interpretation": "Small effect (h=0.229): sycophancy increases from 27.7% at 0% context to 38.4% at 100% context"
+    },
+    "trend": {
+      "trend": "non_monotonic",
+      "description": "Irregular pattern (\u21916, \u21932, \u21922)",
+      "total_change_pp": 10.72,
+      "rates_by_level": {
+        "0%": 0.2769,
+        "10%": 0.2739,
+        "20%": 0.3142,
+        "30%": 0.3275,
+        "40%": 0.3466,
+        "50%": 0.3615,
+        "60%": 0.3503,
+        "70%": 0.3645,
+        "80%": 0.3668,
+        "90%": 0.3959,
+        "100%": 0.3841
+      },
+      "n_levels": 11
+    }
+  },
   "mistralai_mistral-small-24b-instruct-2501": {
     "n_total": 11385,
     "n_valid": 11381,
