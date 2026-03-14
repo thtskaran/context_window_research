@@ -78,15 +78,15 @@ All six models show the same hierarchy: Opinion and Logic most vulnerable, Math 
 
 ### How Models Cave: Failure Mode Taxonomy
 
-We classify all 10,637 sycophantic responses into three failure modes using heuristic text analysis:
+All 10,637 sycophantic responses classified by Claude Sonnet 4.6 into three failure modes:
 
 | Failure Mode | Overall | Description |
 |---|---|---|
-| **Qualified agreement** | 64.3% | Contains hedges ("however", "mostly", "it depends") but net validates the false claim |
-| **Direct validation** | 21.1% | Blunt "You're right!" with no nuance or caveats |
-| **Elaborate justification** | 14.6% | Builds structured arguments (bullet points, evidence) supporting the false claim |
+| **Qualified agreement** | 49.1% | Contains hedges ("however", "mostly", "it depends") but net validates the false claim |
+| **Elaborate justification** | 41.4% | Builds structured arguments, fabricated evidence, or step-by-step reasoning supporting the false claim |
+| **Direct validation** | 9.5% | Blunt "You're right!" with no nuance or caveats |
 
-The mode profile differs sharply by model. Mixtral 8x7B is the bluntest — 51% direct validation ("You're correct!"). DeepSeek V3.1 almost never bluntly agrees — 94% of its (rare) sycophantic responses are qualified, suggesting it "knows" the claim is wrong but hedges rather than correcting. Opinion probes are 79% qualified vs 1% direct — models hedge on opinions rather than flatly agreeing.
+Elaborate justification is the dominant failure mode for small models — Gemma 3N leads at 58%, actively constructing cases for false claims. DeepSeek V3.1 sits at the opposite extreme: 84% qualified, 0% direct — when it caves, it always hedges, never bluntly agrees. Mixtral 8x7B has the most diverse failure profile (51% qualified / 30% elaborate / 19% direct). By domain: math triggers the most elaborate failures (52%) as models generate step-by-step "proofs" of wrong answers. Opinion probes show 50% elaborate / 49% qualified with near-zero direct.
 
 ![Taxonomy](code/figures/taxonomy_stacked.png)
 
@@ -113,7 +113,7 @@ We construct synthetic conversations of varying length (0-100% of the 32K contex
 
 **Persona variation**: Each non-opinion probe delivered through one of 8 rotating framings — casual thinker, college-educated, PhD holder, friend discussion, professor appeal, 15-year professional, peer-reviewed citation, and social consensus ("everyone knows"). These map to 4 authority groups: low authority, credential claim, external source, and social pressure.
 
-**Scoring**: All results scored by Claude Sonnet 4.6 as judge, with separate rubrics for factual vs opinion probes. Inter-rater reliability validated with Claude 3.5 Haiku on a 1,200-trial stratified subsample (Cohen's κ = 0.705, 93.4% agreement).
+**Scoring**: All results scored by Claude Sonnet 4.6 as judge, with separate rubrics for factual vs opinion probes. Sycophantic responses are further classified into failure modes (direct/elaborate/qualified) by a second Sonnet 4.6 taxonomy judge pass. Inter-rater reliability validated with Claude 3.5 Haiku on a 1,200-trial stratified subsample (Cohen's κ = 0.705, 93.4% agreement).
 
 **Statistical model**: Bayesian binomial GLMM with probe_id as random intercept and logit link.
 
@@ -129,27 +129,35 @@ python llm_judge.py --input results/<model_slug>_results.jsonl \
   --output results/<model_slug>_judged.jsonl \
   --judge-model anthropic/claude-sonnet-4-6 --keys-file keys.txt --workers 35
 
+python taxonomy_judge.py --input results/<model_slug>_judged.jsonl \
+  --output results/<model_slug>_judged.jsonl \
+  --judge-model anthropic/claude-sonnet-4-6 --keys-file keys.txt --workers 35
+
 python phase_diagram.py --results-dir results/ --output-dir figures/
 python statistical_tests.py --results-dir results/ --output figures/stats_report.json --verbose
+python secondary_analysis.py
 ```
 
 Create `code/keys.txt` with one OpenRouter API key per line.
 
 ## Cost
 
-All experiments run via OpenRouter. Judge is Claude Sonnet 4.6 at $3/M input tokens.
+All experiments run via OpenRouter. Sonnet 4.6 judge at $3/M input, $15/M output tokens.
 
-| Model | Experiment | Judge | Total |
+| Model | Experiment | Sycophancy Judge | Total |
 |---|---|---|---|
-| Gemma 3N E4B ($0.02/M) | $3 | $68 | **$72** |
+| Gemma 3N E4B ($0.02/M) | $3 | $68 | **$71** |
 | Qwen 2.5 7B ($0.10/M) | $16 | $66 | **$82** |
 | Mixtral 8x7B ($0.54/M) | $92 | $68 | **$160** |
 | Mistral Small 24B ($0.05/M) | $9 | $68 | **$77** |
-| DeepSeek V3.1 ($0.15/M) | $25 | $68 | **$94** |
-| Qwen 2.5 72B ($0.12/M) | $20 | $68 | **$89** |
-| **Total** | **$165** | **$408** | **$573** |
+| DeepSeek V3.1 ($0.15/M) | $25 | $68 | **$93** |
+| Qwen 2.5 72B ($0.12/M) | $20 | $68 | **$88** |
+| Taxonomy judge (all models) | — | ~$25 | **~$25** |
+| **Total** | **$165** | **$431** | **~$596** |
 
-The judge dominates cost (~71%). The experiments themselves are cheap — even the 72B model only costs $20 for 11K calls.
+The judge dominates cost (~72%). The experiments themselves are cheap — even the 72B model only costs $20 for 11K calls.
+
+**Taxonomy judge cost (~$25, approximate):** Only the 10,637 sycophantic responses need taxonomy classification (second Sonnet 4.6 pass). Each call sends the taxonomy prompt (1,087 chars) + claim (avg 61 chars) + truth (avg 133 chars) + model response (avg 990 chars, truncated at 2,000 chars) = ~2,271 chars input. Output is one word (~2 tokens). At ~3.3 chars/token → ~788 tokens/call × 10,637 calls = ~8.4M input tokens × $3/M ≈ $25. Output cost is negligible ($0.32). This is an estimate — actual OpenRouter billing may differ slightly due to tokenizer differences.
 
 ## Repo Structure
 
@@ -162,7 +170,8 @@ The judge dominates cost (~71%). The experiments themselves are cheap — even t
 └── code/
     ├── probes.json             # 115 probes (6 domains) + 8 persona templates
     ├── run_experiment.py       # Async experiment runner
-    ├── llm_judge.py            # Domain-aware LLM judge
+    ├── llm_judge.py            # Domain-aware LLM judge (sycophantic/honest/ambiguous)
+    ├── taxonomy_judge.py       # LLM judge for failure mode taxonomy (direct/elaborate/qualified)
     ├── phase_diagram.py        # All figures
     ├── statistical_tests.py    # GLMM, Spearman, Mann-Whitney, chi-squared
     ├── persona_analysis.py     # Persona template effect analysis

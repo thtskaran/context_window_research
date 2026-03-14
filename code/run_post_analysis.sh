@@ -45,7 +45,33 @@ done
 
 echo ""
 echo "═══════════════════════════════════════════════════════════"
-echo " Step 2: Phase diagrams + figures"
+echo " Step 2: Sonnet 4.6 taxonomy judge — classifying failure modes"
+echo "   Classifies each sycophantic response: direct/elaborate/qualified"
+echo "═══════════════════════════════════════════════════════════"
+
+for judged_file in "$RESULTS_DIR"/*_judged.jsonl; do
+    [ -f "$judged_file" ] || continue
+    model_slug=$(basename "$judged_file" _judged.jsonl)
+
+    echo ""
+    echo "Taxonomy: $model_slug"
+    echo "  File:   $judged_file"
+    echo "  Judge:  $JUDGE_MODEL"
+
+    python taxonomy_judge.py \
+        --input "$judged_file" \
+        --output "$judged_file" \
+        --judge-model "$JUDGE_MODEL" \
+        --keys-file "$KEYS_FILE" \
+        --probes-path "$PROBES_PATH" \
+        --workers 35
+
+    echo "  Done"
+done
+
+echo ""
+echo "═══════════════════════════════════════════════════════════"
+echo " Step 3: Phase diagrams + figures"
 echo "═══════════════════════════════════════════════════════════"
 
 python phase_diagram.py \
@@ -54,13 +80,20 @@ python phase_diagram.py \
 
 echo ""
 echo "═══════════════════════════════════════════════════════════"
-echo " Step 3: Statistical tests"
+echo " Step 4: Statistical tests"
 echo "═══════════════════════════════════════════════════════════"
 
 python statistical_tests.py \
     --results-dir "$RESULTS_DIR" \
     --output "${FIGURES_DIR}/stats_report.json" \
     --verbose
+
+echo ""
+echo "═══════════════════════════════════════════════════════════"
+echo " Step 5: Secondary analysis (taxonomy plots, latency, length)"
+echo "═══════════════════════════════════════════════════════════"
+
+python secondary_analysis.py
 
 echo ""
 echo "═══════════════════════════════════════════════════════════"

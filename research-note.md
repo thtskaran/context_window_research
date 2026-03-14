@@ -23,7 +23,7 @@ All models tested at their 32K architectural limit — filling 100% of the conte
 | DeepSeek V3.1 | ~37B active (MoE) | DeepSeek | 11,367 | 6.0% |
 | Qwen 2.5 72B | 72B | Alibaba | 11,381 | 6.7% |
 
-Total: 67,708 valid trials across 6 models, 4 families. Total cost: ~$573 ($165 for experiments, $408 for Sonnet 4.6 judge).
+Total: 67,708 valid trials across 6 models, 4 families. Total cost: ~$596 ($165 experiments, $406 sycophancy judge, ~$25 taxonomy judge). Taxonomy cost is approximate — 10,637 calls × ~788 input tokens/call × $3/M; see README for full derivation.
 
 ## Key Findings
 
@@ -110,7 +110,7 @@ The paper should have five main contributions:
 
 3. **The credential paradox.** Informal social framings ("my friend disagrees", "everyone knows") trigger more sycophancy than expert claims ("I have a PhD", "15 years experience"). Models are trained to be agreeable, not to defer to authority. The persona effect is significant in 5/6 models (χ² up to 406, p < 10⁻³⁵) and acts independently of context length.
 
-4. **Sycophantic failure taxonomy.** 64% of sycophantic responses are qualified (hedged but net validating), 21% are direct ("You're right!"), 15% are elaborate (confabulated supporting arguments). Large models hedge when they cave; small models bluntly agree. Mixtral is 51% direct — the bluntest capitulator. DeepSeek is 94% qualified — it "knows" the claim is wrong.
+4. **Sycophantic failure taxonomy.** 49% of sycophantic responses are qualified (hedged but net validating), 41% are elaborate (confabulated supporting arguments), 10% are direct ("You're right!"). Elaborate justification — where the model actively constructs a case for the false claim — is the dominant small-model failure mode (Gemma 58%). Large models hedge when they cave (DeepSeek 84% qualified, 0% direct). Math probes trigger the most elaborate failures (52%).
 
 5. **Sycophancy as cognitive shortcut.** Sycophantic responses are faster (up to 10% in Qwen 7B) and shorter (up to 12% fewer words) than honest responses in small models. Large models that cave write longer, more qualified responses. Agreement is the path of least resistance for capacity-limited models.
 
@@ -123,13 +123,13 @@ The paper should have five main contributions:
 
 ### 8. How models cave: a taxonomy of sycophantic failure
 
-We classified all 10,637 sycophantic responses into three failure modes:
+All 10,637 sycophantic responses classified into three failure modes by Claude Sonnet 4.6:
 
-- **Qualified agreement (64%)** — the most common mode. The model hedges ("however", "mostly correct", "it depends") but ultimately validates the false claim. DeepSeek V3.1 is 94% qualified — when it caves, it almost always signals internal conflict through hedging. Opinion domain is 79% qualified, confirming models treat opinions differently from factual claims even when sycophantic.
+- **Qualified agreement (49.1%)** — the model hedges ("however", "mostly correct", "it depends") but ultimately validates the false claim. DeepSeek V3.1 is 84% qualified / 0% direct — when it caves, it always signals internal conflict through hedging, never bluntly agrees. Mistral 24B follows at 72% qualified.
 
-- **Direct validation (21%)** — blunt "You're right!" agreement with no nuance. Mixtral 8x7B stands out at 51% direct — it's the bluntest capitulator. Math and science domains have the highest direct rates (~33%), suggesting false quantitative claims trigger less hedging.
+- **Elaborate justification (41.4%)** — the model builds structured arguments, fabricated evidence, or step-by-step reasoning supporting the false claim. This is the most insidious mode — the model actively confabulates. Gemma 3N leads at 58% elaborate, actively constructing cases for false claims. Math domain triggers the most elaborate failures (52%), as models generate step-by-step "proofs" of wrong answers. Opinion probes show 50% elaborate — models construct justifications rather than bluntly validating.
 
-- **Elaborate justification (15%)** — the model builds structured arguments (bullet points, numbered lists, cited evidence) supporting the false claim. This is the most insidious mode — the model actively confabulates. Opinion domain has the highest elaborate rate (20%).
+- **Direct validation (9.5%)** — blunt "You're right!" agreement with no nuance. Mixtral 8x7B has the highest direct rate at 19%, but even it is predominantly qualified (51%). Direct validation is rare across large models — Mistral 24B (1%), DeepSeek V3.1 (0%), Qwen 72B (1%).
 
 ### 9. Sycophancy is the path of least resistance
 
@@ -156,7 +156,7 @@ Haiku is systematically more lenient: of 79 total disagreements, 73 (92%) are ca
 
 Per-model κ ranges from 0.526 (Qwen 7B, moderate) to 0.862 (Qwen 72B, almost perfect). Per-domain: science (κ=0.859) and factual (κ=0.821) show almost perfect agreement; opinion (κ=0.439) is the weakest — unsurprising given that opinion judgments are inherently more subjective.
 
-The key takeaway: a $408 Sonnet judge and a ~$3 Haiku judge agree on 93% of trials with substantial κ. The Sonnet judge is defensible.
+The key takeaway: a $406 Sonnet judge and a ~$3 Haiku judge agree on 93% of trials with substantial κ. The Sonnet judge is defensible.
 
 ## Statistical Methods
 

@@ -2,9 +2,9 @@
   "taxonomy": {
     "total_sycophantic": 10637,
     "overall": {
-      "direct": 2241,
-      "elaborate": 1556,
-      "qualified": 6840
+      "direct": 1008,
+      "elaborate": 4403,
+      "qualified": 5226
     }
   },
   "latency": {
