@@ -115,7 +115,7 @@ Via OpenRouter API: `qwen/qwen-2.5-7b-instruct`
 
 ### 3.3 Cost
 
-Total across all 6 models including injection experiment: **~$631** ($175 experiments + $456 judge passes). Original experiment: $165 experiments + $406 sycophancy judge + ~$25 taxonomy judge = ~$596. Correction injection follow-up: ~$10 experiments + ~$25 judge = ~$35. Per-model average: ~$95 for original experiment + sycophancy judging. The sycophancy judge dominates cost (~72%). See README for full cost derivation.
+Total across all 6 models including injection and mixed filler experiments: **~$674** ($189 experiments + $485 judge passes). Original experiment: $165 experiments + $406 sycophancy judge + ~$25 taxonomy judge = ~$596. Correction injection follow-up: ~$10 experiments + ~$25 judge = ~$35. Mixed filler follow-up: ~$14 experiments + ~$29 judge = ~$43. Per-model average: ~$95 for original experiment + sycophancy judging. The judge dominates cost (~72%). See README for full cost derivation.
 
 ---
 
@@ -247,6 +247,36 @@ Correction exchanges are placed at the *end* of the agreement block (recency mat
 
 ---
 
+## 5.7 Mixed Filler Ratio Experiment (Follow-Up)
+
+A targeted follow-up testing ecological validity: real conversations contain mixed agreement and correction. Does the ratchet have a threshold ratio, or is it a smooth gradient?
+
+**Design:** Fixed at 50% context fill. 7 conditions with interleaved (not blocked) filler — each exchange is randomly drawn from the agreement or correction pool with probability equal to the target ratio:
+
+| Condition | Agree Ratio | Correct Ratio | Purpose |
+|---|---|---|---|
+| mix_100_0 | 100% | 0% | Pure agreement baseline |
+| mix_90_10 | 90% | 10% | Near-pure agreement |
+| mix_70_30 | 70% | 30% | Majority agreement |
+| mix_50_50 | 50% | 50% | Equal mix |
+| mix_30_70 | 30% | 70% | Majority correction |
+| mix_10_90 | 10% | 90% | Near-pure correction |
+| mix_0_100 | 0% | 100% | Pure correction baseline |
+
+**Key difference from injection experiment:** Injection uses blocked filler (agreement block → corrections at end, testing recency). Mixed uses interleaved filler (random ordering throughout, testing steady-state composition). Both hold total filler constant at 50% context.
+
+**Scale:** 115 probes × 7 conditions × 6 models = 4,830 expected calls, 4,799 valid trials + 4,799 judge calls.
+
+**Primary metrics:**
+- Sycophancy rate per ratio condition
+- Threshold detection: steepest adjacent step (sigmoid inflection) and first ratio significantly above correction baseline (ratchet engagement point)
+- Adjacent chi-squared tests between neighboring conditions
+- Per-domain breakdown
+
+**Implementation:** `run_mixed_filler.py` (imports shared components from `run_experiment.py`), `analyze_mixed_filler.py` (threshold detection, adjacent tests, heatmap data), `run_mixed_all.sh` (full pipeline).
+
+---
+
 ## 6. Codebase Structure
 
 ```
@@ -258,6 +288,9 @@ code/
 ├── run_correction_injection.py # Correction injection mitigation experiment
 ├── analyze_injection.py        # Injection results analysis (reset fractions, dose-response)
 ├── run_injection_all.sh        # Full injection pipeline (all 6 models)
+├── run_mixed_filler.py         # Mixed filler ratio experiment (interleaved agree/correct)
+├── analyze_mixed_filler.py     # Mixed filler analysis (threshold detection, phase diagram)
+├── run_mixed_all.sh            # Full mixed filler pipeline (all 6 models)
 ├── phase_diagram.py            # Phase diagram + filler/domain comparison figures
 ├── statistical_tests.py        # Full statistical battery (GLMM, Spearman, Mann-Whitney, etc.)
 ├── run_qwen.sh                 # One-shot Qwen pipeline

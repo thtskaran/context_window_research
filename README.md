@@ -1,6 +1,6 @@
 # Context-Window Lock-In: Measuring How LLMs Break as Conversations Get Longer
 
-Does sycophancy increase as an LLM's context window fills up? We test this across six 32K-context models totalling 67,708 valid trials. The context-length effect scales inversely with model size — small models (~4-12B) degrade measurably, large models (24B+) are flat. The universal finding across all six models is the **behavioral ratchet**: conversational pattern matters more than conversation length. Agreement filler roughly doubles sycophancy compared to correction filler (p < 10⁻¹⁴ in every model). A follow-up **correction injection experiment** (4,140 trials) shows the ratchet can be partially or fully reset by injecting correction exchanges — large models respond to as few as 1 correction, while small models need 5-10.
+Does sycophancy increase as an LLM's context window fills up? We test this across six 32K-context models totalling 67,708 valid trials. The context-length effect scales inversely with model size — small models (~4-12B) degrade measurably, large models (24B+) are flat. The universal finding across all six models is the **behavioral ratchet**: conversational pattern matters more than conversation length. Agreement filler roughly doubles sycophancy compared to correction filler (p < 10⁻¹⁴ in every model). A follow-up **correction injection experiment** (4,140 trials) shows the ratchet can be partially or fully reset by injecting correction exchanges — large models respond to as few as 1 correction, while small models need 5-10. A **mixed filler experiment** (4,799 trials) tests ecological validity by interleaving agreement and correction at 7 ratios — the ratchet is a smooth gradient with no sharp phase transition, and even 10% correction scattered through a conversation provides massive protection.
 
 ## Results Summary
 
@@ -123,6 +123,30 @@ We tested whether injecting correction exchanges after agreement filler can undo
 
 Mistral 24B is a floor effect — baseline sycophancy too low (3.5%) to measure meaningful reset.
 
+### Mixed Filler: Is There a Threshold Ratio?
+
+Real conversations aren't pure agreement or pure correction. We tested ecological validity by interleaving agreement and correction exchanges at 7 ratios (100/0 to 0/100), with exchanges randomly drawn per ratio. Fixed at 50% context, 115 probes × 7 conditions × 6 models = 4,799 valid trials + judge pass.
+
+**The ratchet is a smooth gradient, not a phase transition.** There is no sharp threshold ratio where sycophancy suddenly spikes. Sycophancy scales roughly linearly with agreement ratio across all models.
+
+| Model | 100/0 | 90/10 | 70/30 | 50/50 | 30/70 | 10/90 | 0/100 |
+|---|---|---|---|---|---|---|---|
+| Gemma 3N | 43.8% | 31.5% | 30.1% | 26.1% | 25.7% | 14.3% | 18.8% |
+| Qwen 7B | 24.6% | 25.2% | 19.3% | 16.7% | 18.3% | 17.4% | 12.2% |
+| Mixtral 8x7B | 26.1% | 21.7% | 22.3% | 15.9% | 15.8% | 18.3% | 14.0% |
+| Mistral 24B | 6.1% | 0.9% | 3.5% | 2.6% | 4.3% | 1.7% | 1.7% |
+| DeepSeek V3.1 | 7.0% | 7.0% | 7.0% | 7.9% | 6.1% | 5.2% | 5.2% |
+| Qwen 72B | 8.7% | 7.8% | 7.0% | 6.1% | 4.3% | 6.1% | 2.6% |
+
+**Three key findings:**
+- **No phase transition.** The mechanism is cumulative exposure (more agreement → stronger in-context prior), not a discrete mode switch.
+- **The "last 10% of corrections" effect.** For Gemma, the steepest step is 90/10 → 100/0 (+12.2pp). Even 10% correction interleaved provides massive protection — you don't need 50% corrections, you need ~10%.
+- **Large models remain immune.** DeepSeek (5.2–7.9%) and Qwen 72B (2.6–8.7%) show no significant variation across any ratio.
+
+![Mixed Filler Phase Diagram](code/figures/mixed_filler_phase_diagram.png)
+![Mixed Filler Susceptible Models](code/figures/mixed_filler_susceptible_models.png)
+![Mixed Filler Heatmap](code/figures/mixed_filler_heatmap.png)
+
 ### Heatmap
 
 ![Heatmap](code/figures/heatmap.png)
@@ -178,11 +202,14 @@ All experiments run via OpenRouter. Sonnet 4.6 judge at $3/M input, $15/M output
 | Qwen 2.5 72B ($0.12/M) | $20 | $68 | **$88** |
 | Taxonomy judge (all models) | — | ~$25 | **~$25** |
 | Injection experiment (all models) | ~$10 | ~$25 | **~$35** |
-| **Total** | **~$175** | **~$456** | **~$631** |
+| Mixed filler experiment (all models) | ~$14 | ~$29 | **~$43** |
+| **Total** | **~$189** | **~$485** | **~$674** |
 
 The judge dominates cost (~72%). The experiments themselves are cheap — even the 72B model only costs $20 for 11K calls.
 
 **Injection experiment cost (~$35, approximate):** 690 calls per model (115 probes × 6 conditions) at 50% context fill. Experiment calls are ~6% of the original volume per model, scaling proportionally (~$10 total across 6 models). Judge cost: 4,140 calls × ~$0.006/call ≈ $25.
+
+**Mixed filler experiment cost (~$43, approximate):** 805 calls per model (115 probes × 7 conditions) at 50% context fill. 4,799 total experiment calls across 6 models (~$14 experiment, small models ~$0.002/call, large models ~$0.005/call). Judge cost: 4,799 calls × ~$0.006/call ≈ $29.
 
 **Taxonomy judge cost (~$25, approximate):** Only the 10,637 sycophantic responses need taxonomy classification (second Sonnet 4.6 pass). Each call sends the taxonomy prompt (1,087 chars) + claim (avg 61 chars) + truth (avg 133 chars) + model response (avg 990 chars, truncated at 2,000 chars) = ~2,271 chars input. Output is one word (~2 tokens). At ~3.3 chars/token → ~788 tokens/call × 10,637 calls = ~8.4M input tokens × $3/M ≈ $25. Output cost is negligible ($0.32). This is an estimate — actual OpenRouter billing may differ slightly due to tokenizer differences.
 
@@ -207,6 +234,9 @@ The judge dominates cost (~72%). The experiments themselves are cheap — even t
     ├── run_correction_injection.py  # Correction injection mitigation experiment
     ├── analyze_injection.py    # Injection results analysis (reset fractions, dose-response)
     ├── run_injection_all.sh    # Full injection pipeline (all 6 models)
+    ├── run_mixed_filler.py     # Mixed filler ratio experiment (interleaved agree/correct)
+    ├── analyze_mixed_filler.py # Mixed filler analysis (threshold detection, phase diagram)
+    ├── run_mixed_all.sh        # Full mixed filler pipeline (all 6 models)
     ├── run_qwen.sh             # Qwen 7B pipeline
     ├── run_qwen72b.sh          # Qwen 72B pipeline
     ├── run_mistral.sh          # Mistral Small 24B pipeline
@@ -232,6 +262,10 @@ The judge dominates cost (~72%). The experiments themselves are cheap — even t
 6. **Injection experiment at single context level.** Correction injection tested only at 50% context fill. The interaction between injection dose and context level (would the ratchet be harder to reset at 90% context?) is untested. The Mixtral non-monotonicity at inject_10 (13% vs inject_5's 9.6%) may be noise or a real overcorrection effect — needs replication.
 
 7. **Injection controls for length but not for content shift.** Replacing agreement tokens with correction tokens changes both the behavioral pattern and the specific content. A stricter control would use semantically matched correction and agreement exchanges on the same topics.
+
+8. **Mixed filler uses random draw, not exact ratio.** Each exchange is drawn with probability = agree_ratio, so actual ratios have sampling variance (e.g., 70/30 target may produce 74/26 in a given trial). With ~40-50 exchanges per trial, the variance is small but nonzero.
+
+9. **Gemma 0/100 anomaly.** Gemma's pure correction rate (18.8%) is higher than its 10/90 rate (14.3%), creating a non-monotonic dip. This may be noise (n=112) or may reflect that Gemma's correction templates trigger a specific response pattern at saturation.
 
 ## Citation
 

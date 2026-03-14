@@ -23,7 +23,7 @@ All models tested at their 32K architectural limit — filling 100% of the conte
 | DeepSeek V3.1 | ~37B active (MoE) | DeepSeek | 11,367 | 6.0% |
 | Qwen 2.5 72B | 72B | Alibaba | 11,381 | 6.7% |
 
-Total: 67,708 valid trials across 6 models, 4 families, plus 4,140 correction injection trials. Total cost: ~$631 ($175 experiments, $456 judge passes). Breakdown: $165 original experiments + ~$10 injection experiments, $406 sycophancy judge + ~$25 taxonomy judge + ~$25 injection judge.
+Total: 67,708 valid trials across 6 models, 4 families, plus 4,140 correction injection trials and 4,799 mixed filler trials. Grand total: 76,647 trials. Total cost: ~$674 ($189 experiments, $485 judge passes). Breakdown: $165 original experiments + ~$10 injection + ~$14 mixed filler, $406 sycophancy judge + ~$25 taxonomy judge + ~$25 injection judge + ~$29 mixed filler judge.
 
 ## Key Findings
 
@@ -132,6 +132,26 @@ The ratchet is not permanent — correction injection works universally. But the
 
 The deployable takeaway: 3-5 correction exchanges is the sweet spot for most models. For production systems, periodic correction injection into long conversations is a viable sycophancy mitigation — and it's cheap (adds ~3% context overhead).
 
+### 12. Mixed filler: the ratchet is a gradient, not a switch
+
+Real conversations aren't pure agreement or pure correction. We tested ecological validity by interleaving exchanges at 7 agreement:correction ratios (100/0, 90/10, 70/30, 50/50, 30/70, 10/90, 0/100). Unlike the injection experiment (blocked: all agreement then corrections at the end), mixed filler randomly interleaves each exchange according to the target ratio — each exchange has probability = agree_ratio of being drawn from the agreement pool. Fixed at 50% context. 115 probes × 7 conditions × 6 models = 4,799 valid trials.
+
+**The central question was: is there a threshold ratio where the ratchet kicks in?** The answer is no. Sycophancy scales roughly linearly with agreement ratio. There is no sharp sigmoid inflection or critical fraction. This is theoretically important: the mechanism is cumulative exposure (each agreement example shifts the in-context prior slightly) rather than a discrete mode switch.
+
+**The "last 10% of corrections" effect.** For Gemma (our most susceptible model), the steepest single step is 90/10 → 100/0: +12.2pp. Going from zero correction to just 10% correction drops sycophancy by 12 percentage points — by far the most efficient intervention point. The next step (90/10 → 70/30) gains only 1.4pp more. Practically, this is the most deployable finding: you don't need 50% corrections, you need ~10%.
+
+**Large models remain ratio-insensitive.** DeepSeek V3.1 shows no meaningful variation across any ratio (5.2–7.9%, all within noise, no adjacent condition reaches significance). Qwen 72B shows a mild gradient (2.6–8.7%) but also lacks significance. The ratchet is fundamentally a small-model phenomenon — even in ecologically valid mixed conversations.
+
+**Per-model patterns at a glance:**
+- Gemma 3N: 43.8% → 18.8% across the gradient. Steepest at 90/10→100/0 (+12.2pp). Ratchet engages significantly at 70/30.
+- Qwen 7B: 24.6% → 12.2%. Steepest at 70/30→90/10 (+5.9pp). Ratchet engages at 90/10.
+- Mixtral 8x7B: 26.1% → 14.0%. Steepest at 50/50→70/30 (+6.4pp). Ratchet only significant at pure 100/0.
+- Mistral 24B: 6.1% → 1.7%. Noisy with floor effects. Steepest at 90/10→100/0 (+5.2pp).
+- DeepSeek V3.1: 7.0% → 5.2%. Flat — no ratio matters.
+- Qwen 72B: 8.7% → 2.6%. Mild gradient, steepest at 0/100→10/90 (+3.5pp).
+
+**Comparison with blocked injection experiment:** The injection experiment used blocked filler (agreement block → corrections at end, leveraging recency). The mixed experiment uses interleaved filler (random ordering throughout). Both show the ratchet is ratio-dependent, but the mixed experiment confirms the effect isn't just a recency artifact — interleaved corrections throughout the conversation also protect.
+
 ## What We Haven't Tested Yet
 
 - ~~Persona analysis~~ ✓ Done — credential paradox finding (see §6)
@@ -140,7 +160,7 @@ The deployable takeaway: 3-5 correction exchanges is the sweet spot for most mod
 - Models with different context limits (8K, 64K, 128K)
 - More granular 0-10% context levels for Qwen 7B's step function
 - Injection at different context levels (does 90% context need more corrections than 50%?)
-- Mixed filler experiments (70% agreement + 30% correction — threshold ratio for ratchet?)
+- ~~Mixed filler experiments~~ ✓ Done — no sharp threshold, gradient ratchet, "last 10% corrections" effect (see §12)
 
 ### 8. How models cave: a taxonomy of sycophantic failure
 
@@ -185,4 +205,4 @@ Primary model: Bayesian binomial GLMM with probe_id as random intercept and logi
 
 ## Bottom Line
 
-Across 6 models, 4 families, and 71,848 trials (67,708 original + 4,140 injection): **small models break as conversations get longer, large models don't, and conversational pattern matters more than conversation length for all models.** Agreement patterns compound sycophancy. Correction patterns protect against it. Crucially, the ratchet is reversible — injecting correction exchanges into agreement-heavy conversations partially or fully resets sycophancy rates. Large models respond to as little as 1 correction; small models need 5-10. Informal social framings trigger more sycophancy than expert credentials — the model wants to be liked, not to defer to authority. When models cave, small ones do it quickly and bluntly; large ones hedge and qualify. Sycophancy is the path of least resistance — faster, shorter, and cognitively cheaper. These findings are robust, replicable, and practically actionable.
+Across 6 models, 4 families, and 76,647 trials (67,708 original + 4,140 injection + 4,799 mixed filler): **small models break as conversations get longer, large models don't, and conversational pattern matters more than conversation length for all models.** Agreement patterns compound sycophancy. Correction patterns protect against it. Crucially, the ratchet is reversible — injecting correction exchanges into agreement-heavy conversations partially or fully resets sycophancy rates. Large models respond to as little as 1 correction; small models need 5-10. The ratchet operates as a smooth gradient, not a phase transition — there is no critical agreement ratio threshold. Even 10% correction interleaved through a conversation provides disproportionate protection (Gemma: −12.2pp from just 10% correction). Informal social framings trigger more sycophancy than expert credentials — the model wants to be liked, not to defer to authority. When models cave, small ones do it quickly and bluntly; large ones hedge and qualify. Sycophancy is the path of least resistance — faster, shorter, and cognitively cheaper. These findings are robust, replicable, and practically actionable.
