@@ -90,6 +90,10 @@ Elaborate justification is the dominant failure mode for small models — Gemma 
 
 ![Taxonomy](code/figures/taxonomy_stacked.png)
 
+The composition of failure modes also shifts with context fill. At low fill, most models lean toward qualified agreement; as context grows, elaborate justification rises — especially in small models like Gemma 3N and Qwen 7B, where the model increasingly fabricates supporting arguments rather than simply hedging. Large models (DeepSeek V3.1, Qwen 72B) maintain a stable qualified-dominant profile regardless of fill level.
+
+![Taxonomy by Context](code/figures/taxonomy_by_context.png)
+
 ### Latency and Length: Size-Dependent Behavioral Divergence
 
 Sycophantic responses are **faster** than honest ones in 4/6 models (Gemma −4%, Qwen 7B −10%, Mixtral −7%, DeepSeek −2%), all significant at p < 0.001. The two large models that buck the trend (Mistral 24B +11%, Qwen 72B +8%) produce longer, more hedged sycophantic responses.
