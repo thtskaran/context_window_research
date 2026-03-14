@@ -1,0 +1,420 @@
+{
+  "persona_rates": {
+    "DeepSeek V3.1": {
+      "15-yr professional": {
+        "rate": 0.0437,
+        "n": 1236
+      },
+      "Casual thinker": {
+        "rate": 0.0541,
+        "n": 1238
+      },
+      "College-educated": {
+        "rate": 0.0477,
+        "n": 1236
+      },
+      "Friend discussion": {
+        "rate": 0.0558,
+        "n": 1237
+      },
+      "Peer-reviewed cite": {
+        "rate": 0.0552,
+        "n": 1232
+      },
+      "PhD holder": {
+        "rate": 0.0542,
+        "n": 1237
+      },
+      "Professor appeal": {
+        "rate": 0.0388,
+        "n": 1236
+      },
+      "Social consensus": {
+        "rate": 0.0575,
+        "n": 1235
+      }
+    },
+    "Gemma 3N": {
+      "15-yr professional": {
+        "rate": 0.3023,
+        "n": 1224
+      },
+      "Casual thinker": {
+        "rate": 0.1837,
+        "n": 1230
+      },
+      "College-educated": {
+        "rate": 0.287,
+        "n": 1223
+      },
+      "Friend discussion": {
+        "rate": 0.4178,
+        "n": 1228
+      },
+      "Peer-reviewed cite": {
+        "rate": 0.372,
+        "n": 1215
+      },
+      "PhD holder": {
+        "rate": 0.3377,
+        "n": 1211
+      },
+      "Professor appeal": {
+        "rate": 0.1504,
+        "n": 1223
+      },
+      "Social consensus": {
+        "rate": 0.3987,
+        "n": 1214
+      }
+    },
+    "Mistral 24B": {
+      "15-yr professional": {
+        "rate": 0.013,
+        "n": 1235
+      },
+      "Casual thinker": {
+        "rate": 0.0395,
+        "n": 1239
+      },
+      "College-educated": {
+        "rate": 0.0129,
+        "n": 1239
+      },
+      "Friend discussion": {
+        "rate": 0.0638,
+        "n": 1239
+      },
+      "Peer-reviewed cite": {
+        "rate": 0.0477,
+        "n": 1236
+      },
+      "PhD holder": {
+        "rate": 0.0234,
+        "n": 1238
+      },
+      "Professor appeal": {
+        "rate": 0.0389,
+        "n": 1235
+      },
+      "Social consensus": {
+        "rate": 0.0469,
+        "n": 1236
+      }
+    },
+    "Mixtral 8x7B": {
+      "15-yr professional": {
+        "rate": 0.3141,
+        "n": 1232
+      },
+      "Casual thinker": {
+        "rate": 0.2141,
+        "n": 1233
+      },
+      "College-educated": {
+        "rate": 0.3146,
+        "n": 1230
+      },
+      "Friend discussion": {
+        "rate": 0.388,
+        "n": 1232
+      },
+      "Peer-reviewed cite": {
+        "rate": 0.1584,
+        "n": 1231
+      },
+      "PhD holder": {
+        "rate": 0.1347,
+        "n": 1232
+      },
+      "Professor appeal": {
+        "rate": 0.186,
+        "n": 1231
+      },
+      "Social consensus": {
+        "rate": 0.3444,
+        "n": 1231
+      }
+    },
+    "Qwen 72B": {
+      "15-yr professional": {
+        "rate": 0.0186,
+        "n": 1234
+      },
+      "Casual thinker": {
+        "rate": 0.0662,
+        "n": 1238
+      },
+      "College-educated": {
+        "rate": 0.0153,
+        "n": 1239
+      },
+      "Friend discussion": {
+        "rate": 0.0492,
+        "n": 1239
+      },
+      "Peer-reviewed cite": {
+        "rate": 0.0413,
+        "n": 1236
+      },
+      "PhD holder": {
+        "rate": 0.0428,
+        "n": 1239
+      },
+      "Professor appeal": {
+        "rate": 0.0663,
+        "n": 1236
+      },
+      "Social consensus": {
+        "rate": 0.0445,
+        "n": 1236
+      }
+    },
+    "Qwen 7B": {
+      "15-yr professional": {
+        "rate": 0.1836,
+        "n": 1193
+      },
+      "Casual thinker": {
+        "rate": 0.1533,
+        "n": 1194
+      },
+      "College-educated": {
+        "rate": 0.1599,
+        "n": 1201
+      },
+      "Friend discussion": {
+        "rate": 0.2577,
+        "n": 1199
+      },
+      "Peer-reviewed cite": {
+        "rate": 0.1814,
+        "n": 1191
+      },
+      "PhD holder": {
+        "rate": 0.2233,
+        "n": 1200
+      },
+      "Professor appeal": {
+        "rate": 0.1555,
+        "n": 1190
+      },
+      "Social consensus": {
+        "rate": 0.2609,
+        "n": 1196
+      }
+    }
+  },
+  "authority_rates": {
+    "DeepSeek V3.1": {
+      "Credential claim": {
+        "rate": 0.0485,
+        "n": 3709
+      },
+      "External source": {
+        "rate": 0.047,
+        "n": 2468
+      },
+      "Low authority": {
+        "rate": 0.0549,
+        "n": 2475
+      },
+      "Social pressure": {
+        "rate": 0.0575,
+        "n": 1235
+      }
+    },
+    "Gemma 3N": {
+      "Credential claim": {
+        "rate": 0.3089,
+        "n": 3658
+      },
+      "External source": {
+        "rate": 0.2609,
+        "n": 2438
+      },
+      "Low authority": {
+        "rate": 0.3007,
+        "n": 2458
+      },
+      "Social pressure": {
+        "rate": 0.3987,
+        "n": 1214
+      }
+    },
+    "Mistral 24B": {
+      "Credential claim": {
+        "rate": 0.0164,
+        "n": 3712
+      },
+      "External source": {
+        "rate": 0.0433,
+        "n": 2471
+      },
+      "Low authority": {
+        "rate": 0.0517,
+        "n": 2478
+      },
+      "Social pressure": {
+        "rate": 0.0469,
+        "n": 1236
+      }
+    },
+    "Mixtral 8x7B": {
+      "Credential claim": {
+        "rate": 0.2545,
+        "n": 3694
+      },
+      "External source": {
+        "rate": 0.1722,
+        "n": 2462
+      },
+      "Low authority": {
+        "rate": 0.301,
+        "n": 2465
+      },
+      "Social pressure": {
+        "rate": 0.3444,
+        "n": 1231
+      }
+    },
+    "Qwen 72B": {
+      "Credential claim": {
+        "rate": 0.0256,
+        "n": 3712
+      },
+      "External source": {
+        "rate": 0.0538,
+        "n": 2472
+      },
+      "Low authority": {
+        "rate": 0.0577,
+        "n": 2477
+      },
+      "Social pressure": {
+        "rate": 0.0445,
+        "n": 1236
+      }
+    },
+    "Qwen 7B": {
+      "Credential claim": {
+        "rate": 0.1889,
+        "n": 3594
+      },
+      "External source": {
+        "rate": 0.1684,
+        "n": 2381
+      },
+      "Low authority": {
+        "rate": 0.2056,
+        "n": 2393
+      },
+      "Social pressure": {
+        "rate": 0.2609,
+        "n": 1196
+      }
+    }
+  },
+  "chi2_persona": {
+    "deepseek/deepseek-chat-v3.1": {
+      "chi2": 8.043279227689077,
+      "p": 0.32879306642299844,
+      "dof": 7,
+      "sig": "False"
+    },
+    "google/gemma-3n-e4b-it": {
+      "chi2": 380.07755278009154,
+      "p": 4.45100444163783e-78,
+      "dof": 7,
+      "sig": "True"
+    },
+    "mistralai/mistral-small-24b-instruct-2501": {
+      "chi2": 81.46940396076482,
+      "p": 6.906877143962091e-15,
+      "dof": 7,
+      "sig": "True"
+    },
+    "mistralai/mixtral-8x7b-instruct": {
+      "chi2": 406.0914249624393,
+      "p": 1.1779573341927404e-83,
+      "dof": 7,
+      "sig": "True"
+    },
+    "qwen/qwen-2.5-72b-instruct": {
+      "chi2": 74.70670358740577,
+      "p": 1.644884846786729e-13,
+      "dof": 7,
+      "sig": "True"
+    },
+    "qwen/qwen-2.5-7b-instruct": {
+      "chi2": 105.13223214629247,
+      "p": 9.370450925573975e-20,
+      "dof": 7,
+      "sig": "True"
+    }
+  },
+  "chi2_authority": {
+    "deepseek/deepseek-chat-v3.1": {
+      "chi2": 3.1590762655176836,
+      "p": 0.36774304497036064,
+      "dof": 3,
+      "sig": "False"
+    },
+    "google/gemma-3n-e4b-it": {
+      "chi2": 72.96526356240997,
+      "p": 9.888416444576502e-16,
+      "dof": 3,
+      "sig": "True"
+    },
+    "mistralai/mistral-small-24b-instruct-2501": {
+      "chi2": 66.89717850099564,
+      "p": 1.9699650533825283e-14,
+      "dof": 3,
+      "sig": "True"
+    },
+    "mistralai/mixtral-8x7b-instruct": {
+      "chi2": 167.17755951624008,
+      "p": 5.1755694556349485e-36,
+      "dof": 3,
+      "sig": "True"
+    },
+    "qwen/qwen-2.5-72b-instruct": {
+      "chi2": 47.42693470995293,
+      "p": 2.8197345365546547e-10,
+      "dof": 3,
+      "sig": "True"
+    },
+    "qwen/qwen-2.5-7b-instruct": {
+      "chi2": 45.7405456074013,
+      "p": 6.439598128888953e-10,
+      "dof": 3,
+      "sig": "True"
+    }
+  },
+  "interaction": {
+    "DeepSeek V3.1": {
+      "low_context_spread": 0.0121,
+      "high_context_spread": 0.0098
+    },
+    "Gemma 3N": {
+      "low_context_spread": 0.1306,
+      "high_context_spread": 0.147
+    },
+    "Mistral 24B": {
+      "low_context_spread": 0.0326,
+      "high_context_spread": 0.0428
+    },
+    "Mixtral 8x7B": {
+      "low_context_spread": 0.1835,
+      "high_context_spread": 0.1586
+    },
+    "Qwen 72B": {
+      "low_context_spread": 0.0306,
+      "high_context_spread": 0.034
+    },
+    "Qwen 7B": {
+      "low_context_spread": 0.0843,
+      "high_context_spread": 0.103
+    }
+  }
+}

@@ -46,6 +46,25 @@ The behavioral ratchet replicates across all six models: agreement > neutral > c
 
 Correction filler is strongly protective in every model. Mixtral shows the strongest correction effect of any model (GLMM β = −1.74) — correction history halves its sycophancy rate from 27.9% to 13.6%.
 
+### Persona Effect: The Credential Paradox
+
+Each probe is delivered through one of 8 rotating persona templates ranging from casual ("I've been thinking...") to high-authority ("I have a PhD", "15 years experience") to social pressure ("everyone knows that"). The counterintuitive finding: **informal, social framings are the most sycophancy-inducing, not credential claims.**
+
+| Authority Group | Gemma 3N | Qwen 7B | Mixtral 8x7B | Mistral 24B | DeepSeek V3.1 | Qwen 72B |
+|---|---|---|---|---|---|---|
+| Social pressure | 39.9% | 26.1% | 34.4% | 4.7% | 5.7% | 4.4% |
+| Low authority | 30.1% | 20.6% | 30.1% | 5.2% | 5.5% | 5.8% |
+| Credential claim | 30.9% | 18.9% | 25.4% | 1.6% | 4.9% | 2.6% |
+| External source | 26.1% | 16.8% | 17.2% | 4.3% | 4.7% | 5.4% |
+| Chi-squared p | < 10⁻¹⁵ | < 10⁻⁹ | < 10⁻³⁵ | < 10⁻¹⁵ | 0.37 (ns) | < 10⁻¹⁰ |
+
+The spread is massive on vulnerable models — Gemma 3N ranges from 15% (Professor appeal) to 42% (Friend discussion) across individual personas. DeepSeek V3.1 is the only model where persona has no significant effect (χ²=8.04, p=0.33).
+
+![Persona Heatmap](code/figures/persona_heatmap.png)
+![Persona Authority Bars](code/figures/persona_authority_bars.png)
+![Persona Spread](code/figures/persona_spread.png)
+![Persona × Context Interaction](code/figures/persona_context_interaction.png)
+
 ### Domain Breakdown
 
 ![Domain Gemma](code/figures/domain_breakdown_google_gemma-3n-e4b-it.png)
@@ -69,7 +88,7 @@ We construct synthetic conversations of varying length (0-100% of the 32K contex
 
 **Six probe domains** (115 total probes): 100 factual probes with objectively wrong claims across factual, math, science, logic, and CS, plus 15 opinion probes with genuinely debatable claims.
 
-**Persona variation**: Each probe delivered through one of 8 rotating framings — from bare assertion to authority claims.
+**Persona variation**: Each non-opinion probe delivered through one of 8 rotating framings — casual thinker, college-educated, PhD holder, friend discussion, professor appeal, 15-year professional, peer-reviewed citation, and social consensus ("everyone knows"). These map to 4 authority groups: low authority, credential claim, external source, and social pressure.
 
 **Scoring**: All results scored by Claude Sonnet 4.6 as judge, with separate rubrics for factual vs opinion probes.
 
@@ -123,6 +142,7 @@ The judge dominates cost (~71%). The experiments themselves are cheap — even t
     ├── llm_judge.py            # Domain-aware LLM judge
     ├── phase_diagram.py        # All figures
     ├── statistical_tests.py    # GLMM, Spearman, Mann-Whitney, chi-squared
+    ├── persona_analysis.py     # Persona template effect analysis
     ├── run_qwen.sh             # Qwen 7B pipeline
     ├── run_qwen72b.sh          # Qwen 72B pipeline
     ├── run_mistral.sh          # Mistral Small 24B pipeline

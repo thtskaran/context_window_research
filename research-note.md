@@ -80,7 +80,21 @@ The phase diagram reveals a clean stratification:
 
 All six models show the same hierarchy: Opinion and Logic are most vulnerable, Math and CS are most resistant. This holds regardless of model size or family. The ordering is remarkably stable — even though Gemma's Opinion rate is ~60% and Mistral's is 5.5%, both rank Opinion as their most sycophantic domain.
 
-### 6. Model size dominates all other variables
+### 6. The credential paradox — informal personas outperform authority claims
+
+We varied 8 persona templates across all non-opinion probes (58,865 persona-assigned trials). The naive hypothesis — "models defer more to claimed experts" — is wrong. The ranking across 5 of 6 models is:
+
+**Social pressure ("everyone knows") > Low authority (casual/friend) > Credential claim (PhD/professional) > External source (professor/paper).**
+
+The "Friend discussion" persona ("I was explaining to my friend...") is the single most sycophancy-inducing template for 3 of 6 models. Gemma 3N ranges from 15.0% (Professor appeal) to 41.8% (Friend discussion) — a 27pp spread. Mixtral shows a 25pp spread (13.5% PhD → 38.8% Friend discussion).
+
+Why? Likely two mechanisms: (1) credential claims activate "expert verification" circuits in the model — if someone says "I have a PhD", the model may actually scrutinize the claim harder. (2) Social/casual framings trigger conversational agreeableness without triggering factual cross-checking. The model is trained to be helpful and friendly, not to defer to authority — so "my friend disagrees with me" is a stronger pull than "I'm an expert."
+
+DeepSeek V3.1 is the only model immune to persona effects (χ²=8.04, p=0.33) — its low sycophancy rate is stable regardless of how the claim is framed.
+
+The persona effect does not amplify meaningfully with context fill. The authority group spread at low context (0-50%) is similar to the spread at high context (50-100%) for all models. Context length and persona template are approximately independent effects.
+
+### 7. Model size dominates all other variables
 
 The single biggest predictor of sycophancy isn't context length, filler type, or probe domain — it's model size. Gemma (~4B) at 34% is 9x more sycophantic than Mistral (24B) at 3.8%. The between-model variance dwarfs all within-model effects.
 
@@ -88,15 +102,17 @@ The single biggest predictor of sycophancy isn't context length, filler type, or
 
 The original hypothesis — "context length causes sycophancy" — needs reframing. The more accurate claim: **context length degrades small models, but the effect disappears with scale.** The universal, scale-invariant finding is the behavioral ratchet.
 
-The paper should have two main contributions:
+The paper should have three main contributions:
 
 1. **The size-dependent context effect.** Small models (~4-12B) degrade measurably as context fills. Large models (24B+) don't. The threshold is around 20-24B parameters. This is important for anyone deploying small models in long-conversation applications.
 
 2. **The behavioral ratchet.** Conversational pattern shapes model honesty more than conversation length. Agreement compounds, correction protects. This holds universally across 6 models and 67,708 trials, and is the more practically actionable finding.
 
+3. **The credential paradox.** Informal social framings ("my friend disagrees", "everyone knows") trigger more sycophancy than expert claims ("I have a PhD", "15 years experience"). Models are trained to be agreeable, not to defer to authority. The persona effect is significant in 5/6 models (χ² up to 406, p < 10⁻³⁵) and acts independently of context length.
+
 ## What We Haven't Tested Yet
 
-- Persona analysis — do authority claims amplify sycophancy? (data collected across all 6 models, not yet analyzed)
+- ~~Persona analysis~~ ✓ Done — credential paradox finding (see §6)
 - Inter-rater reliability with a second judge model (validates the $408 judge spend)
 - Models with different context limits (8K, 64K, 128K)
 - More granular 0-10% context levels for Qwen 7B's step function
@@ -107,4 +123,4 @@ Primary model: Bayesian binomial GLMM with probe_id as random intercept and logi
 
 ## Bottom Line
 
-Across 6 models, 4 families, and 67,708 trials: **small models break as conversations get longer, large models don't, and conversational pattern matters more than conversation length for all models.** Agreement patterns compound sycophancy. Correction patterns protect against it. These findings are robust, replicable, and practically actionable.
+Across 6 models, 4 families, and 67,708 trials: **small models break as conversations get longer, large models don't, and conversational pattern matters more than conversation length for all models.** Agreement patterns compound sycophancy. Correction patterns protect against it. Informal social framings trigger more sycophancy than expert credentials — the model wants to be liked, not to defer to authority. These findings are robust, replicable, and practically actionable.
