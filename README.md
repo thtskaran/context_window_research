@@ -339,6 +339,7 @@ The judge dominates cost (~72%). The experiments themselves are cheap — even t
 @misc{prasad2026contextlock,
   title={Context-Window Lock-In and Silent Degradation in Large Language Models},
   author={Prasad, Karan},
+  orcid={0009-0009-0747-2311},
   year={2026},
   note={Preprint, Obvix Labs}
 }
