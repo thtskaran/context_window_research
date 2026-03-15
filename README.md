@@ -5,7 +5,7 @@
 [![Trials](https://img.shields.io/badge/trials-80%2C433-blue)]()
 [![Models](https://img.shields.io/badge/models-6-green)]()
 
-**Paper:** [`paper/behavioral-ratchet-sycophancy-2026.pdf`](paper/behavioral-ratchet-sycophancy-2026.pdf)
+**Paper:** [DOI: 10.5281/zenodo.19026682](https://doi.org/10.5281/zenodo.19026682)
 **Author:** Karan Prasad ([ORCID](https://orcid.org/0009-0009-0747-2311)) — Obvix Labs
 
 Does sycophancy increase as an LLM's context window fills up? We test this across six 32K-context models totalling **80,433 trials** (67,708 original + 4,140 correction injection + 4,799 mixed filler + 3,786 fine-grained). The context-length effect scales inversely with model size — small models (~4-12B) degrade measurably, large models (24B+) are flat. The universal finding across all six models is the **behavioral ratchet**: conversational pattern matters more than conversation length. Agreement filler roughly doubles sycophancy compared to correction filler (p < 10^-14 in every model).
