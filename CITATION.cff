@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this research, please cite it as below."
+title: "The Behavioral Ratchet: How Conversational History Shapes LLM Sycophancy Across 80,433 Trials"
+authors:
+  - family-names: Prasad
+    given-names: Karan
+    orcid: "https://orcid.org/0009-0009-0747-2311"
+    affiliation: "Obvix Labs"
+date-released: "2026-03-15"
+doi: "10.5281/zenodo.19026682"
+url: "https://github.com/thtskaran/context_window_research"
+repository-code: "https://github.com/thtskaran/context_window_research"
+license: "CC-BY-4.0"
+type: dataset
+keywords:
+  - sycophancy
+  - context window
+  - behavioral ratchet
+  - LLM alignment
+  - RLHF
+  - in-context learning
